@@ -66,7 +66,7 @@ function calcLcl(pres, t, td)
  
   var cond = true;
   var TNEW, ESNEW, WSNEW;
-  var TLCL, PLCL;
+  var PLCL = TLCL = -999.;
   while (cond) {
     PUP = PUP-1.;
     var TNEW = t*Math.pow((PUP/pres), RCP);
@@ -229,6 +229,46 @@ function satarry(pbase, tbase, TSATM, PSATM)
       PSATM[isat]=parseFloat(j);
       isat++;
     }
+  }
+
+  return isat;
+}
+
+function satarry1(plcl, tlcl, TSATM, PSATM) 
+{
+  var Tk=273.15;
+  var g=9.81;
+  var Rv=461.51;
+  var Rd=287.05;
+  var Cpd=1005.;
+  var Tk=273.15;
+  var HL=2.5*(Math.pow(10,6));
+  var HLD=Math.pow(HL,2);
+  var EIP=0.622;
+  var EIPD=Math.pow(EIP,2);
+  var HLCP=HL/Cpd;
+  var GAMMAd=g/Cpd;
+  var JSTEP=-1;
+  var HIGH=0.;
+  var TEM1=tlcl;
+  var isat=0;
+
+  for (var j=parseInt(plcl); j<=1050; j++) {
+    var Es=6.107*Math.exp(HL/Rv*((1./Tk)-1./TEM1));
+    var PARTU=EIP *HL *Es/(Rd*TEM1);
+    var PARTL=EIPD*HLD*Es/(Cpd*Rd*(Math.pow(TEM1,2)));
+    var GAMMAs1=GAMMAd*(1.+PARTU/j)/(1.+PARTL/j);
+    var GAMMAs2=GAMMAd*(1.+PARTU/(j+JSTEP))/(1.+PARTL/(j+JSTEP));
+    var DHGT1=(3. - log10(parseFloat(j)));
+    var DHGT2=(3. - log10(parseFloat(j+JSTEP)));
+    var DZ1=Rd*TEM1/g*Math.log(parseFloat(j)/parseFloat(j+JSTEP));
+    var TEM2=TEM1+GAMMAs1*DZ1;
+
+    HIGH=HIGH-DZ1;
+    TEM1=TEM2;
+    TSATM[isat]=TEM1;
+    PSATM[isat]=parseFloat(j);
+    isat++;
   }
 
   return isat;
@@ -1028,4 +1068,574 @@ function calcCin(data, lcl, ccl, lfc, el)
 function calcMidval(Pm,Pl,Pu,Tl,Tu) {
   var value = Tl+(Pm-Pl)*(Tu-Tl)/(Pu-Pl);
   return value;
+}
+
+function calcHailSize(data, ccl) {
+  var hail = {};
+  var Blev = delta1 = delta2 = size = wbz = -999;
+
+  if (ccl.p == -999.) {
+    hail.size = size;
+    return hail;
+  }
+
+  // calculate temperature -5 degree level(B level)
+  var ok = 0;
+  for (var k=0; k<data.length; k++) {
+    if (parseFloat(data[k].pres) > ccl.p) {
+      continue;
+    }
+
+    if (parseFloat(data[k].ta) < -5) {
+      ok++;
+      break;
+    }
+  }
+
+  var T, P, RATIO;
+  var cond = true;
+  if (ok == 1) {
+    T = parseFloat(data[k].ta);
+    P = parseFloat(data[k].pres);
+
+    while (cond) {
+      RATIO = (T-parseFloat(data[k-1].ta))/(P-parseFloat(data[k-1].pres));
+
+      if (T < -5) {
+        P = P + 1;
+        T = T + RATIO;
+      }
+
+      if (T < -5 && RATIO >= 0) {
+      }
+      else {
+        break;
+      }
+    }
+
+    Blev = P;
+  }
+
+  // calculate b
+  var b;
+  var TSATM = [], PSATM = [];
+  var isat = satarry(ccl.p,ccl.t,TSATM,PSATM);
+
+  for (var m=0; m<isat; m++) {
+    if (PSATM[m] > Blev) {
+      continue;
+    }
+    else if (parseInt(PSATM[m]) == parseInt(Blev)) {
+      b = TSATM[m] - 273.15;
+      break;
+    }
+  }
+  delta1 = b + 5;
+
+  // calculate c
+  var RCP = 0.286;
+  var c = (-5 + 273.15)*Math.pow((ccl.p/Blev), RCP) - 273.15;
+  delta2 = c + 5;
+
+  // diagram
+  size = 0;
+
+  if (delta2 >= 50) {
+    if (delta1 >= 10) {
+      size = 99;
+    }
+    else if (delta1 >= 9) {
+      size = 85;
+    }
+    else if (delta1 >= 8) {
+      size = 75;
+    }
+    else if (delta1 >= 7) {
+      size = 60;
+    }
+    else if (delta1 >= 6) {
+      size = 50;
+    }
+    else if (delta1 >= 5) {
+      size = 45;
+    }
+    else if (delta1 >= 4) {
+      size = 35;
+    }
+    else if (delta1 >= 3) {
+      size = 25;
+    }
+    else if (delta1 >= 2) {
+      size = 20;
+    }
+    else if (delta1 >= 1) {
+      size = 10;
+    }
+    else if (delta1 >= 0) {
+      size = 5;
+    }
+  }
+  else if (delta2 >= 45) {
+    if (delta1 >= 11) {
+      size = 99;
+    }
+    else if (delta1 >= 10) {
+      size = 90;
+    }
+    else if (delta1 >= 9) {
+      size = 80;
+    }
+    else if (delta1 >= 8) {
+      size = 65;
+    }
+    else if (delta1 >= 7) {
+      size = 60;
+    }
+    else if (delta1 >= 6) {
+      size = 50;
+    }
+    else if (delta1 >= 5) {
+      size = 45;
+    }
+    else if (delta1 >= 4) {
+      size = 35;
+    }
+    else if (delta1 >= 3) {
+      size = 25;
+    }
+    else if (delta1 >= 2) {
+      size = 20;
+    }
+    else if (delta1 >= 1) {
+      size = 5;
+    }
+  }
+  else if (delta2 >= 40) {
+    if (delta1 >= 12) {
+      size = 99;
+    }
+    else if (delta1 >= 11) {
+      size = 85;
+    }
+    else if (delta1 >= 10) {
+      size = 80;
+    }
+    else if (delta1 >= 9) {
+      size = 70;
+    }
+    else if (delta1 >= 8) {
+      size = 60;
+    }
+    else if (delta1 >= 7) {
+      size = 55;
+    }
+    else if (delta1 >= 6) {
+      size = 45;
+    }
+    else if (delta1 >= 5) {
+      size = 40;
+    }
+    else if (delta1 >= 4) {
+      size = 30;
+    }
+    else if (delta1 >= 3) {
+      size = 20;
+    }
+    else if (delta1 >= 2) {
+      size = 15;
+    }
+    else if (delta1 >= 1) {
+      size = 5;
+    }
+  }
+  else if (delta2 >= 35) {
+    if (delta1 >= 12) {
+      size = 80;
+    }
+    else if (delta1 >= 11) {
+      size = 75;
+    }
+    else if (delta1 >= 10) {
+      size = 70;
+    }
+    else if (delta1 >= 9) {
+      size = 60;
+    }
+    else if (delta1 >= 8) {
+      size = 55;
+    }
+    else if (delta1 >= 7) {
+      size = 50;
+    }
+    else if (delta1 >= 6) {
+      size = 45;
+    }
+    else if (delta1 >= 5) {
+      size = 40;
+    }
+    else if (delta1 >= 4) {
+      size = 30;
+    }
+    else if (delta1 >= 3) {
+      size = 20;
+    }
+    else if (delta1 >= 2) {
+      size = 15;
+    }
+    else if (delta1 >= 1) {
+      size = 5;
+    }
+  }
+  else if (delta2 >= 30) {
+    if (delta1 >= 12) {
+      size = 65;
+    }
+    else if (delta1 >= 10) {
+      size = 60;
+    }
+    else if (delta1 >= 9) {
+      size = 55;
+    }
+    else if (delta1 >= 8) {
+      size = 50;
+    }
+    else if (delta1 >= 7) {
+      size = 45;
+    }
+    else if (delta1 >= 6) {
+      size = 40;
+    }
+    else if (delta1 >= 5) {
+      size = 35;
+    }
+    else if (delta1 >= 4) {
+      size = 25;
+    }
+    else if (delta1 >= 3) {
+      size = 20;
+    }
+    else if (delta1 >= 2) {
+      size = 10;
+    }
+  }
+  else if (delta2 >= 25) {
+    if (delta1 >= 13) {
+      size = 55;
+    }
+    else if (delta1 >= 10) {
+      size = 50;
+    }
+    else if (delta1 >= 9) {
+      size = 45;
+    }
+    else if (delta1 >= 7) {
+      size = 40;
+    }
+    else if (delta1 >= 6) {
+      size = 35;
+    }
+    else if (delta1 >= 5) {
+      size = 30;
+    }
+    else if (delta1 >= 4) {
+      size = 20;
+    }
+    else if (delta1 >= 3) {
+      size = 15;
+    }
+    else if (delta1 >= 2) {
+      size = 5;
+    }
+  }
+  else if (delta2 >= 20) {
+    if (delta1 >= 13) {
+      size = 50;
+    }
+    else if (delta1 >= 11) {
+      size = 45;
+    }
+    else if (delta1 >= 9) {
+      size = 40;
+    }
+    else if (delta1 >= 8) {
+      size = 35;
+    }
+    else if (delta1 >= 7) {
+      size = 30;
+    }
+    else if (delta1 >= 6) {
+      size = 25;
+    }
+    else if (delta1 >= 5) {
+      size = 20;
+    }
+    else if (delta1 >= 4) {
+      size = 15;
+    }
+    else if (delta1 >= 3) {
+      size = 5;
+    }
+  }
+  else if (delta2 >= 15) {
+    if (delta1 >= 11) {
+      size = 35;
+    }
+    else if (delta1 >= 10) {
+      size = 30;
+    }
+    else if (delta1 >= 8) {
+      size = 25;
+    }
+    else if (delta1 >= 6) {
+      size = 20;
+    }
+    else if (delta1 >= 5) {
+      size = 15;
+    }
+    else if (delta1 >= 4) {
+      size = 10;
+    }
+  }
+  else if (delta2 >= 10) {
+    if (delta1 >= 12) {
+      size = 25;
+    }
+    else if (delta1 >= 10) {
+      size = 20;
+    }
+    else if (delta1 >= 7) {
+      size = 15;
+    }
+    else if (delta1 >= 6) {
+      size = 10;
+    }
+    else if (delta1 >= 5) {
+      size = 5;
+    }
+  }
+  else if (delta2 >= 0) {
+    if (delta1 >= 12) {
+      size = 15;
+    }
+    else if (delta1 >= 8) {
+      size = 10;
+    }
+    else if (delta1 >= 6) {
+      size = 5;
+    }
+  }
+  //size = delta1 * delta2 / 5.;
+
+  // calculate wet-bulb freezing level(wbz)
+  wbz = 0;
+  var ok = 0;
+  var ta, td, rh, tw, tw0, pres, pres0;
+/*
+  for (var k=0; k<data.length; k++) {
+    ta = parseFloat(data[k].ta);
+    td = parseFloat(data[k].td);
+    pres = parseFloat(data[k].pres);
+    rh = calcRH(ta, td);
+    tw = ta*Math.atan(0.151977*Math.sqrt(rh+8.313659)) + Math.atan(ta+rh) - Math.atan(rh-1.676331) + 0.00391838*Math.pow(rh,1.5)*Math.atan(0.023101*rh) - 4.68035;
+
+    if (tw > ta) {
+      tw = ta;
+    }
+
+    if (k == 0 && tw < 0) {
+      break;
+    }
+    if (tw < 0) {
+      ok++;
+      break;
+    }
+
+    tw0 = tw;
+    pres0 = pres;
+  }
+*/
+  for (var k=0; k<data.length; k++) {
+    ta = parseFloat(data[k].ta);
+    tw = parseFloat(data[k].tw);
+    pres = parseFloat(data[k].pres);
+
+    if (k == 0 && tw < 0) {
+      break;
+    }
+    if (tw < 0) {
+      ok++;
+      break;
+    }
+
+    tw0 = tw;
+    pres0 = pres;
+  }
+
+  var cond = true;
+  if (ok == 1) {
+    T = tw
+    P = pres;
+
+    while (cond) {
+      RATIO = (T-tw0)/(P-pres0);
+
+      if (T < 0) {
+        P = P + 1;
+        T = T + RATIO;
+      }
+
+      if (T < 0 && RATIO >= 0) {
+      }
+      else {
+        break;
+      }
+    }
+
+    wbz = fprtohh(P);
+  }
+
+  if (wbz >= 4400) {
+    size = 0;
+  }
+  else if (wbz >= 4150) {
+    if (size >= 100) {
+      size = 5;
+    }
+    else {
+      size = 0;
+    }
+  }
+  else if (wbz >= 3950) {
+    if (size >= 75) {
+      size = 10;
+    }
+    else if (size >= 50) {
+      size = 5;
+    }
+    else {
+      size = 0;
+    }
+  }
+  else if (wbz >= 3750) {
+    if (size >= 75) {
+      size = 15;
+    }
+    else if (size >= 50) {
+      size = 10;
+    }
+    else if (size >= 25) {
+      size = 5;
+    }
+    else {
+      size = 0;
+    }
+  }
+  else if (wbz >= 3550) {
+    if (size >= 125) {
+      size = 30;
+    }
+    else if (size >= 100) {
+      size = 25;
+    }
+    else if (size >= 50) {
+      size = 20;
+    }
+    else if (size >= 25) {
+      size = 10;
+    }
+    else if (size >= 20) {
+      size = 5;
+    }
+    else {
+      size = 0;
+    }
+  }
+  else if (wbz >= 3350) {
+    if (size >= 125) {
+      size = 75;
+    }
+    else if (size >= 100) {
+      size = 65;
+    }
+    else if (size >= 75) {
+      size = 50;
+    }
+    else if (size >= 50) {
+      size = 25;
+    }
+    else if (size >= 25) {
+      size = 15;
+    }
+    else if (size >= 20) {
+      size = 10;
+    }
+    else if (size >= 10) {
+      size = 5;
+    }
+    else {
+      size = 0;
+    }
+  }
+  //size *= 2.4269*Math.pow(10,-10)*wbz + 1.777*Math.pow(10,-7)*Math.pow(wbz,2) + 2.74566*Math.pow(10,-10)*Math.pow(wbz,3) - 1.53595*Math.pow(10,-13)*Math.pow(wbz,4) + 1.85681*Math.pow(10,-17)*Math.pow(wbz,5);
+
+  hail.delta1 = delta1;
+  hail.delta2 = delta2;
+  hail.size = size;
+  hail.wbz = wbz;
+  return hail;
+}
+
+function calcRH(ta, td) {
+  var RH;
+  var ESTD = calcVapor(td);
+  var EST = calcVapor(ta);
+
+  if (EST == 0) {
+    RH = -999;
+  }
+  else {
+    RH = (ESTD/EST)*100.;
+  }
+
+  return RH;
+}
+
+function calcTw(data) {
+  var C2K = 273.15;
+
+  for (var k=0; k<data.length; k++) {
+    if (data[k].pres == "SFC") {
+      var pres = parseFloat(data[k].ps);
+    }
+    else if (parseFloat(data[k].pres) < 300 || data[k].ta <= -999 || data[k].td <= -999) {
+      continue;
+    }
+    else {
+      var pres = parseFloat(data[k].pres);
+    }
+
+    var TSATM = [], PSATM = [];
+
+    var lcl = calcLcl(pres, parseFloat(data[k].ta), parseFloat(data[k].td));
+    var isat = satarry1(lcl.p,lcl.t,TSATM,PSATM);
+
+    for (var m=0; m<isat; m++) {
+      if (parseInt(pres) == parseInt(PSATM[m])) {
+        data[k].tw = TSATM[m] - C2K;
+        break;
+      }
+    }
+  }
+
+  return;
+}
+
+function calcCVT(data, ccl) {
+  var CVT = -99.;
+  var C2K = 273.15;
+  var AKAPPA = 0.28586;
+
+  CVT = (ccl.t)*Math.pow(parseFloat(data[0].pres)/ccl.p, AKAPPA) - C2K;
+
+  return CVT;
 }

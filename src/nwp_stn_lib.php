@@ -109,8 +109,63 @@ else if ($mode == "2") {
 
           if ((intval($arr1[0]) == intval($stn)) || (intval($arr1[0]) == intval($stn)+47000)) {       
             for($i=2; $i<count($arr); $i++) {
-              $td = sprintf("%.1f", fnGetDewTemperature(floatval($arr[$i]+273.15), floatval($arr1[$i]), floatval($level)));
-              echo $tm_arr[$i].",".$td."\n";
+              $td = fnGetDewTemperature(floatval($arr[$i]+273.15), floatval($arr1[$i]), floatval($level));
+              echo $tm_arr[$i].",".sprintf("%.1f",$td)."\n";
+            }
+            $ok = 1;
+            break;
+          }
+          $line++;
+        }
+        if ($ok == 0) echo "@no data\n";
+        fclose($fp);
+      }
+    }
+    else {
+      echo "@no data\n";
+    }
+  }
+  else if ($var == "TW" && $level == "SFC") {
+    $var  = "TA";
+    $var1 = "TD";
+    if (file_check($tmfc, $var, $level, $model) == 1 && file_check($tmfc, $var1, $level, $model) == 1) {
+      file_check($tmfc, $var, $level, $model);
+      $fp = fopen($fname,"r");
+      if ($fp) {
+        while (!feof($fp)) {
+          $str = fgets($fp, 2048);
+          $arr = explode(",",$str);
+          if ((intval($arr[0]) == intval($stn)) || (intval($arr[0]) == intval($stn)+47000)) {       
+            break;
+          }
+        }
+        fclose($fp);
+      }
+
+      file_check($tmfc, $var1, $level, $model);
+      $fp = fopen($fname,"r");
+      if ($fp) {
+        $line = 0;
+        $ok = 0;
+        while (!feof($fp)) {
+          $str = fgets($fp, 2048);
+          $arr1 = explode(",",$str);
+          if ($line == 1) {
+            $tm_arr = array();
+            $nt = mktime(substr($tmfc,8,2),0,0,substr($tmfc,4,2),substr($tmfc,6,2),substr($tmfc,0,4));
+            for($i=2; $i<count($arr1); $i++) {
+              $itv = intval($arr1[$i]);
+              $tm_arr[$i] = date("YmdHi", $nt + $itv*60*60);
+            }
+          }
+
+          if ((intval($arr1[0]) == intval($stn)) || (intval($arr1[0]) == intval($stn)+47000)) {       
+            for($i=2; $i<count($arr); $i++) {
+              $ta = floatval($arr[$i]);
+              $td = floatval($arr1[$i]);
+              $rh = fnGetRelativeHumidity($ta, $td);
+              $tw = fnGetWetBulbTemperature($ta, $rh);
+              echo $tm_arr[$i].",".sprintf("%.1f",$tw)."\n";
             }
             $ok = 1;
             break;
@@ -164,9 +219,9 @@ else if ($mode == "2") {
               $ta = floatval($arr[$i]);
               $td = fnGetDewTemperature(($ta+273.15), floatval($arr1[$i]), floatval($level));
               $tlcl = fnGetLclTemp(floatval($level), $ta, $td);
-              $mr = fnGetMixingratio($ta, $td, 850);
-              $ept = sprintf("%.1f", fnGetEpt(floatval($level)*100, $ta+273.15, $mr*0.001, $tlcl+273.15));
-              echo $tm_arr[$i].",".$ept."\n";
+              $mr = fnGetMixingratio($ta, $td, floatval($level));
+              $ept = fnGetEpt(floatval($level)*100, $ta+273.15, $mr*0.001, $tlcl+273.15);
+              echo $tm_arr[$i].",".sprintf("%.1f",$ept)."\n";
             }
             $ok = 1;
             break;
@@ -281,7 +336,7 @@ else if ($mode == "2") {
         $line = 0;
         $ok = 0;
         while (!feof($fp)) {
-          $str = fgets($fp, 2048);
+          $str = fgets($fp, 4096);
           $arr = explode(",",$str);
           if ($line == 1) {
             $tm_arr = array();
@@ -380,7 +435,42 @@ else if ($mode == "3") {
 
       // SQL
       $sz = "
-      select to_char(tm,'yyyymmddhh24mi') tm, ta, hm
+      select A.tm, A.ta, B.hm, C.ps
+      from (
+        select to_char(tm,'yyyymmddhh24mi') tm, ta
+        from aws_hr_ta
+        where tm >= to_date(:tm,'yyyymmddhh24mi') and tm <= to_date(:tm,'yyyymmddhh24mi')
+          and aws_id = :aws_id
+      ) A, (
+        select to_char(tm,'yyyymmddhh24mi') tm, hm
+        from aws_hr_hm
+        where tm >= to_date(:tm,'yyyymmddhh24mi') and tm <= to_date(:tm,'yyyymmddhh24mi')
+          and aws_id = :aws_id
+      ) B, (
+        select to_char(tm,'yyyymmddhh24mi') tm, ps
+        from aws_hr_ps
+        where tm >= to_date(:tm,'yyyymmddhh24mi') and tm <= to_date(:tm,'yyyymmddhh24mi')
+          and aws_id = :aws_id
+      ) C
+      where A.tm = B.tm
+        and A.tm = C.tm
+      order by tm
+      ";
+
+      $stmt = odbc_prepare($dbconn, $sz);
+      $exec = odbc_execute($stmt, array($tm1, $tm2, $stn, $tm1, $tm2, $stn, $tm1, $tm2, $stn));
+      while ($rs = odbc_fetch_array($stmt)) {
+        echo $rs[TM].",";
+        echo sprintf("%.1f", fnGetDewTemperatureSFC(floatval($rs[TA]), floatval($rs[HM])))."\n";
+        $count++;
+      }
+      if ($count == 0) echo "@no data\n";
+    }
+    else if ($var == "TW") {
+
+      // SQL
+      $sz = "
+      select A.tm, A.ta, B.hm
       from (
         select to_char(tm,'yyyymmddhh24mi') tm, ta
         from aws_hr_ta
@@ -392,7 +482,7 @@ else if ($mode == "3") {
         where tm >= to_date(:tm,'yyyymmddhh24mi') and tm <= to_date(:tm,'yyyymmddhh24mi')
           and aws_id = :aws_id
       ) B
-      where A.aws_id = B.aws_id
+      where A.tm = B.tm
       order by tm
       ";
 
@@ -400,8 +490,48 @@ else if ($mode == "3") {
       $exec = odbc_execute($stmt, array($tm1, $tm2, $stn, $tm1, $tm2, $stn));
       while ($rs = odbc_fetch_array($stmt)) {
         echo $rs[TM].",";
-        echo $rs[TA].",";
-        echo $rs[HM]."\n";
+        echo sprintf("%.1f", fnGetWetBulbTemperature(floatval($rs[TA]), floatval($rs[HM])))."\n";
+        $count++;
+      }
+      if ($count == 0) echo "@no data\n";
+    }
+    else if ($var == "PSL") {
+
+      // SQL
+      $sz = "
+      select to_char(tm,'yyyymmddhh24mi') tm, ps
+      from aws_hr_ps
+      where tm >= to_date(:tm,'yyyymmddhh24mi') and tm <= to_date(:tm,'yyyymmddhh24mi')
+        and aws_id = :aws_id
+      order by tm
+      ";
+
+      $stmt = odbc_prepare($dbconn, $sz);
+      $exec = odbc_execute($stmt, array($tm1, $tm2, $stn));
+      while ($rs = odbc_fetch_array($stmt)) {
+        echo $rs[TM].",";
+        echo $rs[PS]."\n";
+        $count++;
+      }
+      if ($count == 0) echo "@no data\n";
+    }
+    else if ($var == "WND") {
+
+      // SQL
+      $sz = "
+      select to_char(tm,'yyyymmddhh24mi') tm, wd, ws
+      from aws_hr_wd
+      where tm >= to_date(:tm,'yyyymmddhh24mi') and tm <= to_date(:tm,'yyyymmddhh24mi')
+        and aws_id = :aws_id
+      order by tm
+      ";
+
+      $stmt = odbc_prepare($dbconn, $sz);
+      $exec = odbc_execute($stmt, array($tm1, $tm2, $stn));
+      while ($rs = odbc_fetch_array($stmt)) {
+        echo $rs[TM].",";
+        echo $rs[WS].":";
+        echo $rs[WD]."\n";
         $count++;
       }
       if ($count == 0) echo "@no data\n";
@@ -414,7 +544,7 @@ else if ($mode == "3") {
 
     // SQL
     $sz = "
-    select to_char(tm,'yyyymmddhh24mi') tm, ta, td, gh, wd, ws
+    select to_char(tm,'yyyymmddhh24mi') tm, nvl(ta*0.1,-999) ta, nvl(td*0.1,-999) td, wd, nvl(wd,-999) wd, nvl(ws*1852.0/3600.0,-999) ws, nvl(gh,-999) gh
     from upp_temp
     where tm >= to_date(:tm,'yyyymmddhh24mi') and tm <= to_date(:tm,'yyyymmddhh24mi')
       and stn_id = :stn_id
@@ -429,13 +559,39 @@ else if ($mode == "3") {
       $nt = mktime(substr($tm,8,2),0,0,substr($tm,4,2),substr($tm,6,2),substr($tm,0,4));
       $tm = date("YmdHi", $nt+9*60*60);
       if ($var == "T") {
+        if ($rs[TA] == -999) continue;
         echo $tm.",";
-        echo strval(floatval($rs[TA])/10.0)."\n";
+        echo $rs[TA]."\n";
         $count++;
       }
       else if ($var == "TD") {
+        if ($rs[TD] == -999) continue;
         echo $tm.",";
-        echo strval(floatval($rs[TD])/10.0)."\n";
+        echo $rs[TD]."\n";
+        $count++;
+      }
+      else if ($var == "GH") {
+        if ($rs[GH] == -999) continue;
+        echo $tm.",";
+        echo $rs[GH]."\n";
+        $count++;
+      }
+      else if ($var == "WND") {
+        if ($rs[WS] == -999 || $rs[WD] == -999) continue;
+        echo $tm.",";
+        echo sprintf("%.1f", floatval($rs[WS])).":".$rs[WD]."\n";
+        $count++;
+      }
+      else if ($var == "EPOT") {
+        if ($rs[TA] == -999 || $rs[TD] == -999) continue;
+        $ta = $rs[TA];
+        $td = $rs[TD];
+        $tlcl = fnGetLclTemp(floatval($level), $ta, $td);
+        $mr = fnGetMixingratio($ta, $td, floatval($level));
+        $ept = fnGetEpt(floatval($level)*100, $ta+273.15, $mr*0.001, $tlcl+273.15);
+
+        echo $tm.",";
+        echo sprintf("%.1f", $ept)."\n";
         $count++;
       }
     }
@@ -471,11 +627,11 @@ else if ($mode == "4") {
 
   // SQL
   $sz = "
-  select to_char(tm,'yyyymmddhh24mi') tm, pa*0.1 pa, nvl(ta*0.1,-999) ta, nvl(td*0.1,-999) td, wd, nvl(wd,-999) wd, nvl(ws*1852.0/3600.0,-999) ws
+  select to_char(tm,'yyyymmddhh24mi') tm, pa*0.1 pa, nvl(ta*0.1,-999) ta, nvl(td*0.1,-999) td, wd, nvl(wd,-999) wd, nvl(ws*1852.0/3600.0,-999) ws, nvl(gh,-999) gh
   from upp_temp
   where tm >= to_date(:tm,'yyyymmddhh24mi') and tm <= to_date(:tm,'yyyymmddhh24mi')
     and stn_id = :stn_id
-  order by tm, pa
+  order by tm, pa desc
   ";
 
   $stmt = odbc_prepare($dbconn, $sz);
@@ -499,8 +655,8 @@ else if ($mode == "4") {
     }
     if ($line == 0) echo "  \"data\": [\n";
     else echo ",\n";
-    printf("    {\"pres\": \"%.1f\", \"ta\": \"%.1f\", \"td\": \"%.1f\", \"vec\": \"%.1f\", \"wsd\": \"%.1f\"}",
-         $rs['PA'], $rs['TA'], $rs['TD'], $rs['WD'], $rs['WS']);
+    printf("    {\"pres\": \"%.0f\", \"ta\": \"%.1f\", \"td\": \"%.1f\", \"vec\": \"%.1f\", \"wsd\": \"%.1f\", \"gh\": \"%.1f\"}",
+         $rs['PA'], $rs['TA'], $rs['TD'], $rs['WD'], $rs['WS'], $rs['GH']);
 
     $line++;
     $count++;
@@ -541,6 +697,20 @@ function file_check($tm, $var, $level, $model)
   else {
     return 0;
   }
+}
+
+// 이슬점온도 산출(지상)
+function fnGetDewTemperatureSFC($ta, $rh)
+{
+  $result = NULL;
+
+  $es = 6.112*exp((17.67*$ta)/($ta+243.5));
+  $e = $es*$rh*0.01;
+  $result = log($e/6.112)*243.5/(17.67-log($e/6.112));
+
+  if (is_nan($result)) $result = NULL;
+
+  return $result;
 }
 
 // 이슬점온도 산출
@@ -645,6 +815,47 @@ function fnGetEpt($pa, $ta, $mr, $tlcl)
   $p2 = ($rr*1000.0) * (1.0 + 0.81*$rr);
 
   $result = $xx * exp($p1*$p2);
+
+  return $result;
+}
+
+//=====================
+// 기온과 이슬점온도로 상대습도 구한다.
+//=====================
+function fnGetRelativeHumidity($ta, $td)
+{
+  $result = NULL;
+  if (is_nan($ta) || is_nan($td))
+    return $result;
+
+  $es = 6.112 * exp(((17.67 * $ta)/($ta + 243.5)));
+  $e = 6.112 * exp(((17.67 * $td)/($td + 243.5)));
+
+  $rh = ($e/$es) * 100;
+  $result = $rh;
+
+  if (is_nan($result)) $result = NULL;
+
+  return $result;
+}
+
+//=====================
+// 습구온도를 구한다. (Wet Bulb Temperature) //2019.11.19. 이창재
+//=====================
+function fnGetWetBulbTemperature($ta, $rh)
+{
+  $result = NULL;
+
+  if ($ta > -90 && $rh >= 0) //계산조건 수정. 2019.11.28. 이창재
+  {
+    $result = $ta * atan(0.151977 * sqrt($rh + 8.313659)) + atan($ta + $rh) - atan($rh - 1.676331) + 0.00391838 * pow($rh, 1.5) * atan(0.023101 * $rh) - 4.68035;
+  }
+  else
+  {
+    $result = NULL;
+  } // end if
+
+  if (is_nan($result)) $result = NULL;
 
   return $result;
 }

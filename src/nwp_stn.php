@@ -55,7 +55,7 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
       <td nowrap>
         <table border=0 cellpadding=0 cellspacing=0 align=left>
         <tr class=T02_Title02>
-          <td nowrap>· 지점 </td>
+          <td nowrap>&middot;&nbsp;지점&nbsp;</td>
           <td nowrap width=4></td> 
           <td nowrap style='display:flex;'> 
             <div id=tms_stn1 class='select-style'></div>
@@ -66,7 +66,7 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
           </td>
 
           <td nowrap width=10></td>
-          <td nowrap>· 발표시각 </td>
+          <td nowrap>&middot;&nbsp;발표시각&nbsp;</td>
           <td nowrap width=4></td> 
           <td nowrap><input type=button class=TB08 style="background-color:#ffffff;" onfocus=blur() onmouseup="tm_init(1);" value=' NOW '></td>
           <td nowrap width=5></td> 
@@ -82,7 +82,12 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
           <td nowrap class=TB09 style="background-color:#ffdfd5; width:30px;" onmouseup="tm_move('+24H');">+1D</td>
 
           <td nowrap width=20></td>
-          <td><div id="dynamic-y-control"><input type="checkbox" id="dynamic-y" onclick="fnChartDisp();" value="1" checked> <label for="dynamic-y" class=text1>y축 스케일 자동조정</label></div></td>
+          <td><div id="dynamic-y-control"><input type="checkbox" id="dynamic-y" onclick="fnChartDisp();" value="1" checked>&nbsp;<label for="dynamic-y" class=text1>y축 스케일 자동조정</label></div></td>
+
+          <td nowrap width=20></td>
+          <td>
+            <div id="old_view"><input type=button class=TB08 style="font-size:8pt; background-color:#EEEEEE; width:80px; height:20px; border-radius:3px; display:none;" onclick="old_view();" value='(구)버전 이동'></div>
+          </td>
         </tr>
         </table>
       </td>
@@ -119,32 +124,32 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
 
           <tr>  
             <td style='font-weight:bold; position:relative; top:-2px;' nowrap>KIM</td>
-            <td nowrap> <input type="checkbox" value="GKIM" onclick="offset_select_all(this.checked, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=GKIM_offset value="0"  onclick="offset_select(this.checked, this.name, this.value);" checked></td>
-            <td nowrap>  <input type="checkbox" name=GKIM_offset value="12" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=GKIM_offset value="24" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=GKIM_offset value="36" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=GKIM_offset value="48" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;<input type="checkbox" value="GKIM" onclick="offset_select_all(this.checked, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GKIM_offset value="0"  onclick="offset_select(this.checked, this.name, this.value);" checked></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GKIM_offset value="12" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GKIM_offset value="24" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GKIM_offset value="36" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GKIM_offset value="48" onclick="offset_select(this.checked, this.name, this.value);"></td>
           </tr>
 
           <tr>  
             <td style='font-weight:bold; position:relative; top:-2px;' nowrap>UM</td>
-            <td nowrap> <input type="checkbox" value="GDPS" onclick="offset_select_all(this.checked, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=GDPS_offset value="0"  onclick="offset_select(this.checked, this.name, this.value);" checked></td>
-            <td nowrap>  <input type="checkbox" name=GDPS_offset value="12" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=GDPS_offset value="24" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=GDPS_offset value="36" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=GDPS_offset value="48" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;<input type="checkbox" value="GDPS" onclick="offset_select_all(this.checked, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GDPS_offset value="0"  onclick="offset_select(this.checked, this.name, this.value);" checked></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GDPS_offset value="12" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GDPS_offset value="24" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GDPS_offset value="36" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=GDPS_offset value="48" onclick="offset_select(this.checked, this.name, this.value);"></td>
           </tr>
 
           <tr>  
             <td style='font-weight:bold; position:relative; top:-2px;' nowrap>ECMWF</td>
-            <td nowrap> <input type="checkbox" value="ECMW" onclick="offset_select_all(this.checked, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=ECMW_offset value="0"  onclick="offset_select(this.checked, this.name, this.value);" checked></td>
-            <td nowrap>  <input type="checkbox" name=ECMW_offset value="12" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=ECMW_offset value="24" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=ECMW_offset value="36" onclick="offset_select(this.checked, this.name, this.value);"></td>
-            <td nowrap>  <input type="checkbox" name=ECMW_offset value="48" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;<input type="checkbox" value="ECMW" onclick="offset_select_all(this.checked, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=ECMW_offset value="0"  onclick="offset_select(this.checked, this.name, this.value);" checked></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=ECMW_offset value="12" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=ECMW_offset value="24" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=ECMW_offset value="36" onclick="offset_select(this.checked, this.name, this.value);"></td>
+            <td nowrap>&nbsp;&nbsp;<input type="checkbox" name=ECMW_offset value="48" onclick="offset_select(this.checked, this.name, this.value);"></td>
           </tr>
         </table>
       </div>
@@ -173,7 +178,13 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
       <div id=drag_menu class=drag>
         <div style='height:12px;'></div>
         <div id=select_TMP draggable=true class=box style='border:1px solid skyblue; padding:6px 4px 4px 4px;'>
-          <div style='font-weight:bold;'>[기온]</div>
+          <div style='display:flex;'>
+            <div style='font-weight:bold;'>[기온]</div>
+            <div style='min-width:60px;'></div>
+            <input type="checkbox" name=split id="TMP_split" onclick="chart_split(this.id, this.checked);">
+            <div style='min-width:4px;'></div>
+            <div style='font-weight:bold; color:red;'>연직층별 표출</div>
+          </div>
 
           <div style='height:4px;'></div>
           <div>
@@ -187,44 +198,52 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
                 <td style='font-weight:bold; min-width:35px;' nowrap>ECMWF</td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="T:500" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="T:500" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>500hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:T:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:T:500" onclick="data_select(this.checked, this.value);" checked></td>
-                <td> <input type="checkbox" name=data value="GDPS:T:500" onclick="data_select(this.checked, this.value);" checked></td>
-                <td> <input type="checkbox" name=data value="ECMW:T:500" onclick="data_select(this.checked, this.value);" checked></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:T:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:T:500" onclick="data_select(this.checked, this.value);" checked></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:T:500" onclick="data_select(this.checked, this.value);" checked></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:T:500" onclick="data_select(this.checked, this.value);" checked></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="T:700" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="T:700" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>700hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:T:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:T:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:T:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:T:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:T:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:T:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:T:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:T:700" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="T:850" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="T:850" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>850hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:T:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:T:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:T:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:T:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:T:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:T:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:T:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:T:850" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="T:925" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="T:925" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>925hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:T:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:T:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:T:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:T:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:T:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:T:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:T:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:T:925" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="T:0" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="T:1000" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>1000hPa</td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:T:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:T:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:T:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:T:1000" onclick="data_select(this.checked, this.value);"></td>
+              </tr>
+              <tr>  
+                <td>&nbsp;<input type="checkbox" value="T:0" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>지상</td>
-                <td> <input type="checkbox" name=data value="OBS:T:0:" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:T:0" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:T:0" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:T:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:T:0:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:T:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:T:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:T:0" onclick="data_select(this.checked, this.value);"></td>
               </tr>
             </table>
           </div>
@@ -244,44 +263,77 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
                 <td style='font-weight:bold; min-width:35px;' nowrap>ECMWF</td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="TD:500" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="TD:500" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>500hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:TD:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:TD:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:TD:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:TD:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:TD:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:TD:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:TD:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:TD:500" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="TD:700" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="TD:700" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>700hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:TD:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:TD:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:TD:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:TD:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:TD:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:TD:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:TD:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:TD:700" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="TD:850" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="TD:850" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>850hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:TD:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:TD:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:TD:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:TD:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:TD:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:TD:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:TD:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:TD:850" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="TD:925" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="TD:925" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>925hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:TD:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:TD:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:TD:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:TD:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:TD:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:TD:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:TD:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:TD:925" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="TD:0" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="TD:1000" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>1000hPa</td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:TD:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:TD:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:TD:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:TD:1000" onclick="data_select(this.checked, this.value);"></td>
+              </tr>
+              <tr>  
+                <td>&nbsp;<input type="checkbox" value="TD:0" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>지상</td>
-                <td> <input type="checkbox" name=data value="OBS:TD:0:" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:TD:0" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:TD:0" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:TD:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:TD:0:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:TD:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:TD:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:TD:0" onclick="data_select(this.checked, this.value);"></td>
+              </tr>
+            </table>
+          </div>
+
+          <div style='height:12px;'></div>
+          <div style='font-weight:bold;'>[습구온도]</div>
+
+          <div style='height:4px;'></div>
+          <div>
+            <table cellpadding=0 cellspacing=0 border=0>
+              <tr>  
+                <td style='font-weight:bold; min-width:35px;' nowrap>전체</td>
+                <td style='font-weight:bold; min-width:55px;' nowrap>구분</td>
+                <td style='font-weight:bold; min-width:35px;' nowrap>관측</td>
+                <td style='font-weight:bold; min-width:35px;' nowrap>KIM</td>
+                <td style='font-weight:bold; min-width:35px;' nowrap>UM</td>
+                <td style='font-weight:bold; min-width:35px;' nowrap>ECMWF</td>
+              </tr>
+              <tr>  
+                <td>&nbsp;<input type="checkbox" value="TW:0" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>지상</td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:TW:0:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:TW:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:TW:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:TW:0" onclick="data_select(this.checked, this.value);"></td>
               </tr>
             </table>
           </div>
@@ -302,44 +354,52 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
                 <td style='font-weight:bold; min-width:35px;' nowrap>ECMWF</td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="WND:500" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="WND:500" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>500hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:WND:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:WND:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:WND:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:WND:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:WND:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:WND:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:WND:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:WND:500" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="WND:700" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="WND:700" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>700hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:WND:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:WND:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:WND:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:WND:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:WND:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:WND:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:WND:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:WND:700" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="WND:850" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="WND:850" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>850hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:WND:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:WND:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:WND:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:WND:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:WND:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:WND:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:WND:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:WND:850" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="WND:925" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="WND:925" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>925hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:WND:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:WND:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:WND:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:WND:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:WND:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:WND:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:WND:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:WND:925" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="WND:0" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="WND:1000" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>1000hPa</td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:WND:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:WND:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:WND:1000" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:WND:1000" onclick="data_select(this.checked, this.value);"></td>
+              </tr>
+              <tr>  
+                <td>&nbsp;<input type="checkbox" value="WND:0" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>지상</td>
-                <td> <input type="checkbox" name=data value="OBS:WND:0:" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:WND:0" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:WND:0" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:WND:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:WND:0:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:WND:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:WND:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:WND:0" onclick="data_select(this.checked, this.value);"></td>
               </tr>
             </table>
           </div>
@@ -360,19 +420,25 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
                 <td style='font-weight:bold; min-width:35px;' nowrap>ECMWF</td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="RNAC:0" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="RNAC:0" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>지상</td>
-                <td> <input type="checkbox" name=data value="OBS:RNAC:0:" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:RNAC:0" onclick="data_select(this.checked, this.value);" checked></td>
-                <td> <input type="checkbox" name=data value="GDPS:RNAC:0" onclick="data_select(this.checked, this.value);" checked></td>
-                <td> <input type="checkbox" name=data value="ECMW:RNAC:0" onclick="data_select(this.checked, this.value);" checked></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:RNAC:0:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:RNAC:0" onclick="data_select(this.checked, this.value);" checked></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:RNAC:0" onclick="data_select(this.checked, this.value);" checked></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:RNAC:0" onclick="data_select(this.checked, this.value);" checked></td>
               </tr>
             </table>
           </div>
         </div>
 
         <div id=select_GPH draggable=true class=box style='border:1px solid skyblue; padding:6px 4px 4px 4px; display:none;'>
-          <div style='font-weight:bold;'>[지위고도]</div>
+          <div style='display:flex;'>
+            <div style='font-weight:bold;'>[지위고도]</div>
+            <div style='min-width:36px;'></div>
+            <input type="checkbox" name=split id="GPH_split" onclick="chart_split(this.id, this.checked);" checked>
+            <div style='min-width:4px;'></div>
+            <div style='font-weight:bold; color:red;'>연직층별 표출</div>
+          </div>
 
           <div style='height:4px;'></div>
           <div>
@@ -386,36 +452,44 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
                 <td style='font-weight:bold; min-width:35px;' nowrap>ECMWF</td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="GH:500" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="GH:200" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>200hPa</td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:GH:200" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:GH:200" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:GH:200" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:GH:200" onclick="data_select(this.checked, this.value);"></td>
+              </tr>
+              <tr>  
+                <td>&nbsp;<input type="checkbox" value="GH:500" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>500hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:GH:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:GH:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:GH:500" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:GH:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:GH:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:GH:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:GH:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:GH:500" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="GH:700" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="GH:700" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>700hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:GH:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:GH:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:GH:700" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:GH:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:GH:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:GH:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:GH:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:GH:700" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="GH:850" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="GH:850" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>850hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:GH:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:GH:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:GH:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:GH:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:GH:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:GH:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:GH:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:GH:850" onclick="data_select(this.checked, this.value);"></td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="GH:925" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="GH:925" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>925hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:GH:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:GH:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:GH:925" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:GH:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:GH:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:GH:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:GH:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:GH:925" onclick="data_select(this.checked, this.value);"></td>
               </tr>
             </table>
           </div>
@@ -435,19 +509,25 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
                 <td style='font-weight:bold; min-width:35px;' nowrap>ECMWF</td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="PSL:0" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="PSL:0" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>지상</td>
-                <td> <input type="checkbox" name=data value="OBS:PSL:0:" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:PSL:0" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:PSL:0" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:PSL:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:PSL:0:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:PSL:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:PSL:0" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:PSL:0" onclick="data_select(this.checked, this.value);"></td>
               </tr>
             </table>
           </div>
         </div>
 
         <div id=select_EPOT draggable=true class=box style='border:1px solid skyblue; padding:6px 4px 4px 4px; display:none;'>
-          <div style='font-weight:bold;'>[상당온위]</div>
+          <div style='display:flex;'>
+            <div style='font-weight:bold;'>[상당온위]</div>
+            <div style='min-width:36px;'></div>
+            <input type="checkbox" name=split id="EPOT_split" onclick="chart_split(this.id, this.checked);">
+            <div style='min-width:4px;'></div>
+            <div style='font-weight:bold; color:red;'>연직층별 표출</div>
+          </div>
 
           <div style='height:4px;'></div>
           <div>
@@ -461,12 +541,36 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
                 <td style='font-weight:bold; min-width:35px;' nowrap>ECMWF</td>
               </tr>
               <tr>  
-                <td> <input type="checkbox" value="EPOT:850" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" value="EPOT:500" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>500hPa</td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:EPOT:500:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:EPOT:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:EPOT:500" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:EPOT:500" onclick="data_select(this.checked, this.value);"></td>
+              </tr>
+              <tr>  
+                <td>&nbsp;<input type="checkbox" value="EPOT:700" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>700hPa</td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:EPOT:700:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:EPOT:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:EPOT:700" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:EPOT:700" onclick="data_select(this.checked, this.value);"></td>
+              </tr>
+              <tr>  
+                <td>&nbsp;<input type="checkbox" value="EPOT:850" onclick="data_select_all(this.checked, this.value);"></td>
                 <td>850hPa</td>
-                <td> <input type="checkbox" name=data value="OBS:EPOT:850:" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GKIM:EPOT:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="GDPS:EPOT:850" onclick="data_select(this.checked, this.value);"></td>
-                <td> <input type="checkbox" name=data value="ECMW:EPOT:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:EPOT:850:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:EPOT:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:EPOT:850" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:EPOT:850" onclick="data_select(this.checked, this.value);"></td>
+              </tr>
+              <tr>  
+                <td>&nbsp;<input type="checkbox" value="EPOT:925" onclick="data_select_all(this.checked, this.value);"></td>
+                <td>925hPa</td>
+                <td>&nbsp;<input type="checkbox" name=data value="OBS:EPOT:925:" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GKIM:EPOT:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="GDPS:EPOT:925" onclick="data_select(this.checked, this.value);"></td>
+                <td>&nbsp;<input type="checkbox" name=data value="ECMW:EPOT:925" onclick="data_select(this.checked, this.value);"></td>
               </tr>
             </table>
           </div>
@@ -476,16 +580,16 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
     </div>
 
     <div style='min-width:10px;'></div>
-    <div id=chartdiv style='width:1000px; height:650px; white-space:nowrap; overflow-y:auto; overflow-x:hidden;'></div>
-    <div style='white-space:nowrap;'>
-      <div style='display:flex;'>
-        <div style='min-width:10px;'></div>
-        <div id=legenddiv style='overflow-y:auto; height:550px; width:150px; margin-top:50px;'></div>
-      </div>
+    <div>
+      <div id=timediv style='position:relative; z-index:200;'></div>
+      <div id=chartdiv style='position:relative; width:1000px; height:650px; overflow-y:auto; overflow-x:hidden;'></div>
     </div>
+
+    <div style='min-width:8px;'></div>
+    <div id=legenddiv style='overflow-y:auto; height:550px; width:150px; margin-top:50px;'></div>
   </div>
 
-  <div id=skew_container style='display:flex;' onscroll='tmbarScroll();'>
+  <div id=skew_container style='display:flex; overflow:hidden;' onscroll='tmbarScroll();'>
     <div style='min-width:10px;'></div>
     <div style='display:flex;'>
       <div>
@@ -494,13 +598,13 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
 
         <div style='min-height:10px;'></div>
         <div style='display:flex; font-weight:bold;'>
-          <div><input type=button class=TB08 style='background-color:#ffffff;width:41px;height:20px;font-size:8pt;' value=' 비교1 ' title='KIM/UM 비교' onClick="mdl_comp(1);"></div>
+          <div><input type=button class=TB08 style='background-color:#ffffff;width:41px;height:20px;font-size:8pt;border-radius:2px;' value=' 비교1 ' title='KIM/UM 비교' onClick="mdl_comp(1);"></div>
           <div style='min-width:4px;'></div>
-          <div><input type=button class=TB08 style='background-color:#ffffff;width:41px;height:20px;font-size:8pt;' value=' 비교2 ' title='KIM/ECMWF 비교' onClick="mdl_comp(2);"></div>
+          <div><input type=button class=TB08 style='background-color:#ffffff;width:41px;height:20px;font-size:8pt;border-radius:2px;' value=' 비교2 ' title='KIM/ECMWF 비교' onClick="mdl_comp(2);"></div>
           <div style='min-width:4px;'></div>
-          <div><input type=button class=TB08 style='background-color:#ffffff;width:41px;height:20px;font-size:8pt;' value=' 비교3 ' title='UM/ECMWF 비교' onClick="mdl_comp(3);"></div>
+          <div><input type=button class=TB08 style='background-color:#ffffff;width:41px;height:20px;font-size:8pt;border-radius:2px;' value=' 비교3 ' title='UM/ECMWF 비교' onClick="mdl_comp(3);"></div>
           <div style='min-width:4px;'></div>
-          <div><input type=button class=TB08 style='background-color:#ffffff;width:41px;height:20px;font-size:8pt;' value=' 비교4 ' title='KIM/UM/ECMWF 비교' onClick="mdl_comp(4);"></div>
+          <div><input type=button class=TB08 style='background-color:#ffffff;width:41px;height:20px;font-size:8pt;border-radius:2px;' value=' 비교4 ' title='KIM/UM/ECMWF 비교' onClick="mdl_comp(4);"></div>
         </div>
 
         <div style='min-height:10px;'></div>
@@ -510,12 +614,12 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
               <td style='font-weight:bold; height:20px; min-width:30px;' nowrap>표출</td>
               <td style='font-weight:bold; min-width:85px;' nowrap></td>
               <td style='font-weight:bold; min-width:75px;' nowrap>구분</td>
-              <td style='font-weight:bold; min-width:60px;' nowrap>발표시각</td>
+              <td style='font-weight:bold; min-width:60px;' nowrap>발표시각 (관측은 관측시각)</td>
             </tr>
 
             <tr>  
-              <td style='height:24px;'> <input type="checkbox" id=skew1 name=skew onclick="fnSkewSelect(this.checked, 1);" checked></td>
-              <td style='font-weight:bold;' nowrap><i style='color:red;' class='fas fa-circle'></i> 단열선도 1</td>
+              <td style='height:24px;'>&nbsp;<input type="checkbox" id=skew1 name=skew onclick="fnSkewSelect(this.checked, 1);" checked></td>
+              <td style='font-weight:bold;' nowrap><i style='color:red;' class='fas fa-circle'></i>&nbsp;단열선도 1</td>
               <td style='font-weight:bold;' nowrap>
                 <select id=model1 onChange='fnSkewSelect(skew1.checked, 1);' class='text3 prevent-keydown'>
                   <option value='GKIM'>KIM</option>
@@ -527,6 +631,7 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
               <td style='font-weight:bold;' nowrap>
                 <select id=offset1 onChange='fnSkewSelect(skew1.checked, 1);' class='text3 prevent-keydown'>
                   <option value=0>-00H</option>
+                  <option value=6>-06H</option>
                   <option value=12>-12H</option>
                   <option value=24>-24H</option>
                   <option value=36>-36H</option>
@@ -536,8 +641,8 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
             </tr>
 
             <tr>  
-              <td style='height:24px;'> <input type="checkbox" id=skew2 name=skew onclick="fnSkewSelect(this.checked, 2);"></td>
-              <td style='font-weight:bold;' nowrap><i style='color:blue;' class='fas fa-circle'></i> 단열선도 2</td>
+              <td style='height:24px;'>&nbsp;<input type="checkbox" id=skew2 name=skew onclick="fnSkewSelect(this.checked, 2);"></td>
+              <td style='font-weight:bold;' nowrap><i style='color:blue;' class='fas fa-circle'></i>&nbsp;단열선도 2</td>
               <td style='font-weight:bold;' nowrap>
                 <select id=model2 onChange='fnSkewSelect(skew2.checked, 2);' class='text3 prevent-keydown'>
                   <option value='GKIM'>KIM</option>
@@ -549,6 +654,7 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
               <td style='font-weight:bold;' nowrap>
                 <select id=offset2 onChange='fnSkewSelect(skew2.checked, 2);' class='text3 prevent-keydown'>
                   <option value=0>-00H</option>
+                  <option value=6>-06H</option>
                   <option value=12>-12H</option>
                   <option value=24>-24H</option>
                   <option value=36>-36H</option>
@@ -558,8 +664,8 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
             </tr>
 
             <tr>  
-              <td style='height:24px;'> <input type="checkbox" id=skew3 name=skew onclick="fnSkewSelect(this.checked, 3);"></td>
-              <td style='font-weight:bold;' nowrap><i style='color:green;' class='fas fa-circle'></i> 단열선도 3</td>
+              <td style='height:24px;'>&nbsp;<input type="checkbox" id=skew3 name=skew onclick="fnSkewSelect(this.checked, 3);"></td>
+              <td style='font-weight:bold;' nowrap><i style='color:green;' class='fas fa-circle'></i>&nbsp;단열선도 3</td>
               <td style='font-weight:bold;' nowrap>
                 <select id=model3 onChange='fnSkewSelect(skew3.checked, 3);' class='text3 prevent-keydown'>
                   <option value='GKIM'>KIM</option>
@@ -571,6 +677,7 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
               <td style='font-weight:bold;' nowrap>
                 <select id=offset3 onChange='fnSkewSelect(skew3.checked, 3);' class='text3 prevent-keydown'>
                   <option value=0>-00H</option>
+                  <option value=6>-06H</option>
                   <option value=12>-12H</option>
                   <option value=24>-24H</option>
                   <option value=36>-36H</option>
@@ -580,8 +687,8 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
             </tr>
 
             <tr>  
-              <td style='height:24px;'> <input type="checkbox" id=skew4 name=skew onclick="fnSkewSelect(this.checked, 4);"></td>
-              <td style='font-weight:bold;' nowrap><i style='color:purple;' class='fas fa-circle'></i> 단열선도 4</td>
+              <td style='height:24px;'>&nbsp;<input type="checkbox" id=skew4 name=skew onclick="fnSkewSelect(this.checked, 4);"></td>
+              <td style='font-weight:bold;' nowrap><i style='color:purple;' class='fas fa-circle'></i>&nbsp;단열선도 4</td>
               <td style='font-weight:bold;' nowrap>
                 <select id=model4 onChange='fnSkewSelect(skew4.checked, 4);' class='text3 prevent-keydown'>
                   <option value='GKIM'>KIM</option>
@@ -593,6 +700,7 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
               <td style='font-weight:bold;' nowrap>
                 <select id=offset4 onChange='fnSkewSelect(skew4.checked, 4);' class='text3 prevent-keydown'>
                   <option value=0>-00H</option>
+                  <option value=6>-06H</option>
                   <option value=12>-12H</option>
                   <option value=24>-24H</option>
                   <option value=36>-36H</option>
@@ -604,20 +712,34 @@ $mode = $_REQUEST["mode"]; if ($mode == "") $mode = "graph";
         </div>
 
         <div style='min-width:374px;'>
-          <div style='height:40px;'></div>
-          <div style='font-weight:bold;'>[값 보기]</div>
-          <div style='min-height:10px;'></div>
+          <div style='height:20px;'></div>
+          <div style='display:flex;'>
+            <div id='skew_index' class='select-button selected' onclick='skew_ext(this);'><i class="fas fa-eye"></i> 불안정지수</div>
+            <div style='min-width:10px;'></div>
+            <div id='skew_change' class='select-button' onclick='skew_ext(this);'><i class="fas fa-edit"></i> BASE 고도 & 값 변경</div>
+            <div style='min-width:10px;'></div>
+            <div id='skew_reset' class='select-button' onclick='skew_ext(this);'><i class="fas fa-retweet"></i> 초기화</div>
+          </div>
+          <div style='height:20px;'></div>
           <div id='skew_table_button' style='display:flex;'>
-            <div><input type=button class=TB08 id=button1 style='width:64px;height:20px;font-size:8pt;border:0.5px solid gray;visibility:hidden;' value=' 단열선도 1 ' onClick="tableSelect(1);"></div>
+            <div><input type=button class=TB08 id=button1 style='width:64px;height:20px;font-size:8pt;border:0.5px solid gray;visibility:hidden;border-radius:2px;' value=' 단열선도 1 ' onClick="tableSelect(1);"></div>
             <div style='min-width:4px;'></div>
-            <div><input type=button class=TB08 id=button2 style='width:64px;height:20px;font-size:8pt;border:0.5px solid gray;visibility:hidden;' value=' 단열선도 2 ' onClick="tableSelect(2);"></div>
+            <div><input type=button class=TB08 id=button2 style='width:64px;height:20px;font-size:8pt;border:0.5px solid gray;visibility:hidden;border-radius:2px;' value=' 단열선도 2 ' onClick="tableSelect(2);"></div>
             <div style='min-width:4px;'></div>
-            <div><input type=button class=TB08 id=button3 style='width:64px;height:20px;font-size:8pt;border:0.5px solid gray;visibility:hidden;' value=' 단열선도 3 ' onClick="tableSelect(3);"></div>
+            <div><input type=button class=TB08 id=button3 style='width:64px;height:20px;font-size:8pt;border:0.5px solid gray;visibility:hidden;border-radius:2px;' value=' 단열선도 3 ' onClick="tableSelect(3);"></div>
             <div style='min-width:4px;'></div>
-            <div><input type=button class=TB08 id=button4 style='width:64px;height:20px;font-size:8pt;border:0.5px solid gray;visibility:hidden;' value=' 단열선도 4 ' onClick="tableSelect(4);"></div>
+            <div><input type=button class=TB08 id=button4 style='width:64px;height:20px;font-size:8pt;border:0.5px solid gray;visibility:hidden;border-radius:2px;' value=' 단열선도 4 ' onClick="tableSelect(4);"></div>
+            <div style='min-width:10px;'></div>
+            <div id='skew_edit' style='width:64px; height:20px; font-size:8pt; border-radius:2px; border:0.5px solid gray; visibility:hidden;' class=TB08 onclick='fnSkewEdit();'>
+              <i class="fas fa-edit" title="수정"></i>&nbsp;값 수정
+            </div>
           </div>
           <div style='height:10px;'></div>
           <div id='skew_table'></div>
+          <div style='height:20px;'></div>
+          <div id='skew_index_table'></div>
+          <div style='height:20px;'></div>
+          <div id='skew_hail_table'></div>
         </div>
       </div>
 

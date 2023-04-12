@@ -12,13 +12,14 @@ var disptype;
 var vars  = [
   {name: "T", option: 0},
   {name: "TD", option: 0},
+  {name: "TW", option: 1},
   {name: "GH", option: 2},
   {name: "PSL", option: 1},
   {name: "RNAC", option: 1},
   {name: "WND", option: 0},
   {name: "EPOT", option: 2}
 ];
-var levs   = [200, 500, 700, 850, 925, 0];
+var levs   = [200, 500, 700, 850, 925, 1000, 0];
 var models = ["GKIM", "GDPS", "ECMW", "OBS"];
 var offsets = [-48, -36, -24, -12, 0];
 var dataset = [], datainfo = [];
@@ -26,11 +27,26 @@ var input = [];
 var count = 0;
 
 var chart_list = [
-  {name: "TMP", disp:1, height:450, vars:["T","TD"], unit:"C"}, 
-  {name: "WND", disp:0, height:80, vars:["WND"]}, 
-  {name: "RNSN", disp:1, height:150, vars:["RNAC"], unit:"mm"}, 
-  {name: "GPH", disp:0, height:350, vars:["GH","PSL"], unit:"gpm / hPa"}, 
-  {name: "EPOT", disp:0, height:350, vars:["EPOT"], unit:"K"}
+  {name: "TMP", disp:1, height:450, vars:["T","TD","TW"], unit:"℃", text:"기온/이슬점온도", level:-1, split:0, sort:0}, 
+  {name: "TMP", disp:0, height:350, vars:["T","TD"], unit:"℃", text:"기온/이슬점온도", level:500, sort:0}, 
+  {name: "TMP", disp:0, height:350, vars:["T","TD"], unit:"℃", text:"기온/이슬점온도", level:700, sort:0}, 
+  {name: "TMP", disp:0, height:350, vars:["T","TD"], unit:"℃", text:"기온/이슬점온도", level:850, sort:0}, 
+  {name: "TMP", disp:0, height:350, vars:["T","TD"], unit:"℃", text:"기온/이슬점온도", level:925, sort:0}, 
+  {name: "TMP", disp:0, height:350, vars:["T","TD","TW"], unit:"℃", text:"기온/이슬점온도", level:0, sort:0}, 
+  {name: "WND", disp:0, height:80, vars:["WND"], unit:"kt", text:"바람", level:-1, split:0, sort:1}, 
+  {name: "RNSN", disp:1, height:150, vars:["RNAC"], unit:"mm", text:"강수량", level:-1, split:0, sort:2}, 
+  {name: "GPH", disp:0, height:350, vars:["GH","PSL"], unit:"gpm/hPa", text:"지위고도/해면기압", level:-1, split:1, sort:3}, 
+  {name: "GPH", disp:0, height:350, vars:["GH"], unit:"gpm", text:"지위고도", level:200, sort:3}, 
+  {name: "GPH", disp:0, height:350, vars:["GH"], unit:"gpm", text:"지위고도", level:500, sort:3}, 
+  {name: "GPH", disp:0, height:350, vars:["GH"], unit:"gpm", text:"지위고도", level:700, sort:3}, 
+  {name: "GPH", disp:0, height:350, vars:["GH"], unit:"gpm", text:"지위고도", level:850, sort:3}, 
+  {name: "GPH", disp:0, height:350, vars:["GH"], unit:"gpm", text:"지위고도", level:925, sort:3}, 
+  {name: "GPH", disp:0, height:350, vars:["PSL"], unit:"hPa", text:"해면기압", level:0, sort:3}, 
+  {name: "EPOT", disp:0, height:350, vars:["EPOT"], unit:"K", text:"상당온위", level:-1, split:0, sort:4},
+  {name: "EPOT", disp:0, height:350, vars:["EPOT"], unit:"K", text:"상당온위", level:500, sort:4}, 
+  {name: "EPOT", disp:0, height:350, vars:["EPOT"], unit:"K", text:"상당온위", level:700, sort:4}, 
+  {name: "EPOT", disp:0, height:350, vars:["EPOT"], unit:"K", text:"상당온위", level:850, sort:4}, 
+  {name: "EPOT", disp:0, height:350, vars:["EPOT"], unit:"K", text:"상당온위", level:925, sort:4}
 ];
 var tm1, tm2, line_tm1, line_tm2, bullet_tm1, bullet_tm2;
 var transform = {x:0, y:0, k:0}, domain1, domain2;
@@ -109,7 +125,6 @@ function onLoad(opt) {
   menu_init(disptype, -1);
   fnInitStn();
   fnInitDrag();
-  fnScroll();
 }
 
 // 드래그 이벤트
@@ -161,11 +176,29 @@ function fnInitDrag() {
     
     if (dragSrcEl != this) {
       var thisid = this.id;
-      var n = chart_list.findIndex(function(x){return (x.name == dragSrcEl.id.split("_")[1])});
-      var n1 = chart_list.findIndex(function(x){return (x.name == thisid.toString().split("_")[1])});
-      var swap = chart_list[n];
-      chart_list[n] = chart_list[n1];
-      chart_list[n1] = swap;
+      var name = dragSrcEl.id.split("_")[1]; 
+      var name1 = thisid.toString().split("_")[1];
+      var n = chart_list.findIndex(function(x){return (x.name == name && x.level == -1)});
+      var n1 = chart_list.findIndex(function(x){return (x.name == name1 && x.level == -1)});
+      var sort = chart_list[n].sort;
+      var sort1 = chart_list[n1].sort;
+
+      for (var i=0; i<chart_list.length; i++) {
+        if (chart_list[i].name == name) {
+          chart_list[i].sort = sort1;
+        }
+        else if (chart_list[i].name == name1) {
+          chart_list[i].sort = sort;
+        }
+      }
+
+      chart_list.sort(function(a,b){
+        return(a.sort<b.sort)?-1:(a.sort>b.sort)?1:0;
+      });
+
+      //var swap = chart_list[n];
+      //chart_list[n] = chart_list[n1];
+      //chart_list[n1] = swap;
 
       swap = dragSrcEl.id;
       dragSrcEl.id = this.id;
@@ -174,9 +207,11 @@ function fnInitDrag() {
       dragSrcEl.innerHTML = this.innerHTML;
       this.innerHTML = e.dataTransfer.getData('text');
 
-      fnChartDisp();
-
       var data = document.getElementsByName("data");
+      for (var j=0; j<data.length; j++) {
+        data[j].checked = false;
+      }
+
       for (var i=0; i<datainfo.length; i++) {
         if (datainfo[i].disp == 1) {
           for (var j=0; j<data.length; j++) {
@@ -186,6 +221,19 @@ function fnInitDrag() {
           }
         }
       }
+
+      var data = document.getElementsByName("split");
+      for (var j=0; j<data.length; j++) {
+        data[j].checked = false;
+      }
+
+      for (var i=0; i<chart_list.length; i++) {
+        if (chart_list[i].split != undefined && chart_list[i].split == 1) {
+          document.getElementById(chart_list[i].name + "_split").checked = true;
+        }
+      }
+
+      fnChartDisp();
     }
     
     return false;
@@ -216,6 +264,7 @@ function menu_init(opt, mode) {
     document.getElementById("skew_container").style.display = "none";
     document.getElementById("graph_container").style.display = "flex";
     document.getElementById("dynamic-y-control").style.display = "block"; 
+    //document.getElementById("old_view").style.display = "block"; 
 
     if (datainfo.length == 0) fnInitInfo();
   }
@@ -225,6 +274,7 @@ function menu_init(opt, mode) {
     document.getElementById("skew_container").style.display = "flex";
     document.getElementById("graph_container").style.display = "none";
     document.getElementById("dynamic-y-control").style.display = "none"; 
+    //document.getElementById("old_view").style.display = "none"; 
 
     //if (mode == -1) document.getElementById("notice").style.display = "block"; 
   }
@@ -555,7 +605,10 @@ function fnSkewData(idx) {
 
     var model = document.getElementById("model"+parseInt(i+1)).value;
     if (model == "OBS") {
-      urls[i] = host + "/fgd/nwp_new/nwp_stn_lib.php?mode=4&tm1=" + tm1 + "&tm2=" + tm2 + "&stn=" + parseInt(document.getElementById("select_stn").value);
+      date.setTime(date.getTime() - document.getElementById("offset"+parseInt(i+1)).value*60*60*1000);
+      tm = addZeros(date.getFullYear(),4) + addZeros(date.getMonth()+1,2) + addZeros(date.getDate(),2) + addZeros(date.getHours(),2) + addZeros(date.getMinutes(),2);  
+
+      urls[i] = host + "/fgd/nwp_new/nwp_stn_lib.php?mode=4&tm1=" + tm + "&tm2=" + tm2 + "&stn=" + parseInt(document.getElementById("select_stn").value);
     }
     else {
       var date = new Date(YY, MM-1, DD, HH, MI);
@@ -585,6 +638,17 @@ function fnSkewData(idx) {
 
         var json = JSON.parse(xhr.responseText);
         for (var i=0; i<json.length; i++) {
+          if (document.getElementById("model"+parseInt(k+1)).value == "OBS") {
+            var YY = json[i].tm_ef.substring(0,4);
+            var MM = json[i].tm_ef.substring(4,6);
+            var DD = json[i].tm_ef.substring(6,8);
+            var HH = json[i].tm_ef.substring(8,10);
+            var MI = json[i].tm_ef.substring(10,12);
+            var date = new Date(YY, MM-1, DD, HH, MI);
+            date.setTime(date.getTime() + document.getElementById("offset"+parseInt(k+1)).value*60*60*1000);
+            json[i].tm_ef = addZeros(date.getFullYear(),4) + addZeros(date.getMonth()+1,2) + addZeros(date.getDate(),2) + addZeros(date.getHours(),2);
+          }
+
           var n = skew_dataset.findIndex(function(x){return (x.tm_ef == json[i].tm_ef)})
           if (n == -1) {
             n = skew_dataset.length;
@@ -608,6 +672,16 @@ function fnSkewDisp() {
   document.getElementById("tmbarCtr").style.visibility = "hidden";
 
   var item = document.getElementById("skew_table");
+  while (item.hasChildNodes()) {
+    item.removeChild(item.childNodes[0]);
+  }
+
+  var item = document.getElementById("skew_index_table");
+  while (item.hasChildNodes()) {
+    item.removeChild(item.childNodes[0]);
+  }
+
+  var item = document.getElementById("skew_hail_table");
   while (item.hasChildNodes()) {
     item.removeChild(item.childNodes[0]);
   }
@@ -657,6 +731,7 @@ function fnSkewDisp() {
     for (var i=0; i<nskew_max; i++) {
       document.getElementById("button"+parseInt(i+1)).style.visibility = "hidden";
     }
+
     return;
   }
   else {
@@ -736,6 +811,43 @@ function mdl_comp(opt) {
   fnGetData();
 }
 
+// 단열선도 값 변경
+function fnSkewEdit() {
+  var n = skew_dataset.findIndex(function(x){return (x.tm_ef == tm_ef)});
+  var tmpData = JSON.parse(JSON.stringify(skew_dataset[n].data));
+
+  var data = document.getElementsByName("tmpData");
+  for (var i=0; i<data.length; i++) {
+    var pres = data[i].getAttribute('data-pres');
+    var k = tmpData[table_button-1].findIndex(function(x){return (x.pres == pres)});
+    if (data[i].getAttribute('data-type') == "ta") {
+      tmpData[table_button-1][k].ta = parseFloat(data[i].value).toFixed(1);
+    }
+    else if (data[i].getAttribute('data-type') == "td") {
+      tmpData[table_button-1][k].td = parseFloat(data[i].value).toFixed(1);
+    }
+
+    if (parseFloat(tmpData[table_button-1][k].td) > parseFloat(tmpData[table_button-1][k].ta)) {
+      tmpData[table_button-1][k].td = tmpData[table_button-1][k].ta;
+    }
+  }
+
+  tmpData[table_button-1].base = skew_dataset[n].data[table_button-1].base;
+  var base = parseFloat(document.getElementsByName("tmpBase")[0].value);
+  if (base < 300) {
+    base = 300;
+  }
+  else if (base > tmpData[table_button-1].base) {
+    base = tmpData[table_button-1].base;
+  }
+  tmpData[table_button-1].tmpBase = base;
+
+  console.log(tmpData[table_button-1]);
+
+  skewt.plot(tmpData);
+  tableDisp(tmpData[table_button-1]);
+}
+
 // 단열선도 테이블 선택(mode - 1: 첫 실행)
 function tableSelect(opt, mode) {
   table_button = opt;
@@ -748,7 +860,7 @@ function tableSelect(opt, mode) {
 }
 
 // 단열선도 테이블 표출
-function tableDisp(i) {
+function tableDisp(data) {
   var item = document.getElementById("skew_table");
   while (item.hasChildNodes()) {
     item.removeChild(item.childNodes[0]);
@@ -757,58 +869,90 @@ function tableDisp(i) {
   var table = document.createElement("table");
   document.getElementById("skew_table").appendChild(table);
   table.classList.add("pop");
+  table.classList.add("fixed_table");
 
-  var d_li = "<th>기압(hPa)</th><th>기온(C)</th><th>이슬점(C)</th><th>풍향(deg)</th><th>풍속(m/s)</th>";
+  var thead = document.createElement("thead");
+  var tbody = document.createElement("tbody");
+
+  var d_li = "<th style='width:62px;'>기압(hPa)</th><th>기온(C)</th><th>이슬점(C)</th><th>풍향(deg)</th><th>풍속(m/s)</th>";
   var d_element = document.createElement("tr");
   d_element.innerHTML = d_li;
-  table.appendChild(d_element);
+  thead.appendChild(d_element);
+  table.appendChild(thead);
 
   var j = table_button - 1;
-  if (skew_dataset[i].data[j] == undefined) return;
+  if (data == undefined) return;
 
-  var pa = [100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 850, 900, 925, 950, 1000];
-  for (var idx=0; idx<pa.length; idx++) {
-    var k = skew_dataset[i].data[j].findIndex(function(x){return (x.pres == pa[idx])});    
+  var length = 0;
+  for (var k=data.length-1; k>=0; k--) {
+    if (data[k].pres == "SFC" || parseFloat(data[k].ta) == -999 || parseFloat(data[k].td) == -999 || parseInt(data[k].pres) < 100) continue;
+
     if (k != -1) {
-      var d_li = "<td>" + pa[idx] + "</td>";
+      var d_li = "<td style='width:62px;'>" + parseInt(data[k].pres) + "</td>";
 
-      if (skew_dataset[i].data[j][k].ta > -999) d_li += "<td>" + skew_dataset[i].data[j][k].ta + "</td>";
-      else d_li += "<td></td>";
+      if (document.getElementById("skew_change").classList.contains("selected")) {
+        if (data[k].ta > -999) d_li += "<td style='width:72px;'><input class='edit prevent-keydown' type='text' name='tmpData' value='" + parseFloat(data[k].ta).toFixed(1) + "' data-pres='" + data[k].pres + "' data-type='ta' oninput='fn_onlyNumInput(event);' onkeydown='if (event.keyCode == 13) fnSkewEdit();'></td>";
+        else d_li += "<td style='width:72px;'>-</td>";
+      }
+      else {
+        if (data[k].ta > -999) d_li += "<td style='width:72px;'>" + parseFloat(data[k].ta).toFixed(1) + "</td>";
+        else d_li += "<td style='width:72px;'>-</td>";
+      }
 
-      if (skew_dataset[i].data[j][k].td > -999) d_li += "<td>" + skew_dataset[i].data[j][k].td + "</td>";
-      else d_li += "<td></td>";
+      if (document.getElementById("skew_change").classList.contains("selected")) {
+        if (data[k].td > -999) d_li += "<td style='width:72px;'><input class='edit prevent-keydown' type='text' name='tmpData' value='" + parseFloat(data[k].td).toFixed(1) + "' data-pres='" + data[k].pres + "' data-type='td' oninput='fn_onlyNumInput(event);' onkeydown='if (event.keyCode == 13) fnSkewEdit();'></td>";
+        else d_li += "<td style='width:72px;'>-</td>";
+      }
+      else {
+        if (data[k].td > -999) d_li += "<td style='width:72px;'>" + parseFloat(data[k].td).toFixed(1) + "</td>";
+        else d_li += "<td style='width:72px;'>-</td>";
+      }
 
-      if (skew_dataset[i].data[j][k].vec > -999) d_li += "<td>" + skew_dataset[i].data[j][k].vec + "</td>";
-      else d_li += "<td></td>";
+      if (data[k].vec > -999) d_li += "<td style='width:72px;'>" + parseFloat(data[k].vec).toFixed(1) + "</td>";
+      else d_li += "<td style='width:72px;'>-</td>";
 
-      if (skew_dataset[i].data[j][k].wsd > -999) d_li += "<td>" + skew_dataset[i].data[j][k].wsd + "</td>";
-      else d_li += "<td></td>";
+      if (data[k].wsd > -999) d_li += "<td style='width:72px;'>" + parseFloat(data[k].wsd).toFixed(1) + "</td>";
+      else d_li += "<td style='width:72px;'>-</td>";
     }
     else {
-      var d_li = "<td>" + pa[idx] + "</td><td></td><td></td><td></td><td></td>";
+      var d_li = "<td>" + parseInt(data[k].pres) + "</td><td></td><td></td><td></td><td></td>";
     }
 
     var d_element = document.createElement("tr");
     d_element.innerHTML = d_li;
-    table.appendChild(d_element);
+    tbody.appendChild(d_element);
+    length += 18;
   }
 
-  var k = skew_dataset[i].data[j].findIndex(function(x){return (x.pres == "SFC")});    
+  var k = data.findIndex(function(x){return (x.pres == "SFC")});    
   if (k != -1) {
     var d_element = document.createElement("tr");
     d_element.style.height = "10px";
-    table.appendChild(d_element);
+    tbody.appendChild(d_element);
 
-    var d_li = "<th>구분</th><th>기온</th><th>이슬점</th><th>습구온도</th><th>강수/강설</th>";
+    var d_li = "<th style='width:62px;'>구분</th><th>기온</th><th>이슬점</th><th>습구온도</th><th>강수/강설</th>";
     var d_element = document.createElement("tr");
     d_element.innerHTML = d_li;
-    table.appendChild(d_element);
+    tbody.appendChild(d_element);
 
-    var d_li = "<td>지상</td><td>" + skew_dataset[i].data[j][k].ta + "</td><td>" + skew_dataset[i].data[j][k].td + "</td><td>" + skew_dataset[i].data[j][k].tw + "</td><td>" + skew_dataset[i].data[j][k].rn + "/" + skew_dataset[i].data[j][k].sn + "</td>";
+    if (document.getElementById("skew_change").classList.contains("selected")) {
+      var d_li = "<td style='width:62px;'>지상</td><td><input class='edit prevent-keydown' type='text' name='tmpData' value='" + parseFloat(data[k].ta).toFixed(1) + "' data-pres='SFC' data-type='ta' oninput='fn_onlyNumInput(event);' onkeydown='if (event.keyCode == 13) fnSkewEdit();'></td>";
+      d_li += "<td><input class='edit prevent-keydown' type='text' name='tmpData' value='" + parseFloat(data[k].td).toFixed(1) + "' data-pres='SFC' data-type='td' oninput='fn_onlyNumInput(event);' onkeydown='if (event.keyCode == 13) fnSkewEdit();'></td>";
+    }
+    else {
+      var d_li = "<td style='width:62px;'>지상</td><td>" + parseFloat(data[k].ta).toFixed(1) + "</td>";
+      d_li += "<td>" + parseFloat(data[k].td).toFixed(1) + "</td>";
+    }
+    d_li += "<td>" + parseFloat(data[k].tw).toFixed(1) + "</td><td>" + data[k].rn + "/" + data[k].sn + "</td>";
     var d_element = document.createElement("tr");
     d_element.innerHTML = d_li;
-    table.appendChild(d_element);
+    tbody.appendChild(d_element);
+
+    length += 18+18+10;
   }
+
+  table.appendChild(tbody);
+  tbody.scrollTop = length;
 }
 
 // 타임바 hover
@@ -851,7 +995,7 @@ function tmbarClick(e, bar)
 
   tm_ef = skew_dataset[n].tm_ef;
   skewt.plot(skew_dataset[n].data);
-  tableDisp(n);
+  tableDisp(skew_dataset[n].data[table_button-1]);
 
   var text = "";
   var k = -1;
@@ -946,7 +1090,7 @@ function tmbarSelect(n)
 
   document.getElementById("data_info").innerText = text;
   skewt.plot(skew_dataset[n].data);
-  tableDisp(n);
+  tableDisp(skew_dataset[n].data[table_button-1]);
 }
 
 // 동화 타임바(시간 이동)
@@ -1002,7 +1146,37 @@ function tmbarPlay(k)
 
   document.getElementById("data_info").innerText = text;
   skewt.plot(skew_dataset[parseInt(n)].data);
-  tableDisp(n);
+  tableDisp(skew_dataset[n].data[table_button-1]);
+}
+
+// 단열선도 부가기능
+function skew_ext(node)
+{
+  if (node.id.indexOf("reset") == -1) {
+    if (node.classList.contains("selected")) {
+      node.classList.remove("selected");
+    }
+    else {
+      node.classList.add("selected");
+    }
+  }
+
+  if (node.id.indexOf("change") != -1) {
+    if (node.classList.contains("selected")) {
+      document.getElementById("skew_edit").style.visibility = "visible";
+    }
+    else {
+      document.getElementById("skew_edit").style.visibility = "hidden";
+    }
+
+    if ( (navigator.appName == 'Netscape' && navigator.userAgent.search('Trident') != -1) || (navigator.userAgent.toLowerCase().indexOf("msie") != -1) ) {
+      document.getElementById("skew_edit").style.paddingTop = "4px";
+    }
+  }
+
+  var n = skew_dataset.findIndex(function(x){return (x.tm_ef == tm_ef)});
+  skewt.plot(skew_dataset[parseInt(n)].data);
+  tableDisp(skew_dataset[n].data[table_button-1]);
 }
 
 // 스크롤 시 시간바 이동
@@ -1034,15 +1208,30 @@ function chart_select(node, value) {
     node.classList.remove("selected");
     document.getElementById('select_'+node.getAttribute("data-value")).style.display = "none";
 
-    var n = chart_list.findIndex(function(x){return (x.name == node.getAttribute("data-value"))});
+    var n = chart_list.findIndex(function(x){return (x.name == node.getAttribute("data-value") && x.level == -1)});
     chart_list[n].disp = 0;
   }
   else {
     node.classList.add("selected");
     document.getElementById('select_'+node.getAttribute("data-value")).style.display = "block";
 
-    var n = chart_list.findIndex(function(x){return (x.name == node.getAttribute("data-value"))});
+    var n = chart_list.findIndex(function(x){return (x.name == node.getAttribute("data-value") && x.level == -1)});
     chart_list[n].disp = 1;
+  }
+
+  fnChartDisp();
+}
+
+function chart_split(id, checked) {
+  for (var i=0; i<chart_list.length; i++) {
+    if (chart_list[i].name == id.toString().split("_")[0] && chart_list[i].level == -1) {
+      if (checked) {
+        chart_list[i].split = 1;
+      }
+      else {
+        chart_list[i].split = 0;
+      }
+    }
   }
 
   fnChartDisp();
@@ -1325,6 +1514,13 @@ function fnGraphData(opt) {
 }
 
 function fnChartDisp() {
+  // 초기화
+  for (var i=0; i<chart_list.length; i++) {
+    if (chart_list[i].level >= 0) {
+      chart_list[i].disp = 0;
+    }
+  }
+
   // 데이터 처리
   var idx = [];
   var nvar = nobs = ngdps = ngkim = necmw = nwind = 0;
@@ -1334,6 +1530,34 @@ function fnChartDisp() {
       nvar++;  
       if (datainfo[i].model == "OBS") nobs++;
       if (datainfo[i].name == "WND") nwind++;
+
+      var n = chart_list.findIndex(function(x){return (x.vars.indexOf(datainfo[i].name) != -1 && x.level == datainfo[i].level)})   
+      if (n != -1) {
+        chart_list[n].disp = 1;
+      }
+    }
+  }
+
+  // 표출할 차트 확인
+  for (var i=0; i<chart_list.length; i++) {
+    if (chart_list[i].level < 0 && chart_list[i].disp == 0) {
+      for (var j=0; j<chart_list.length; j++) {
+        if (i==j) continue;
+
+        if (chart_list[i].name == chart_list[j].name) {
+          chart_list[j].disp = 0;
+        }
+      }
+    }
+  }
+
+  for (var i=0; i<chart_list.length; i++) {
+    if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+      if (document.getElementById(chart_list[i].name + "_split").checked == false) {
+        if (chart_list[i].level >= 0) {
+          chart_list[i].disp = 0;
+        }
+      }
     }
   }
 
@@ -1372,6 +1596,11 @@ function fnChartDisp() {
     }
   }
 
+  var item = document.getElementById("timediv");
+  while (item.hasChildNodes()) {
+    item.removeChild(item.childNodes[0]);
+  }
+
   var item = document.getElementById("chartdiv");
   while (item.hasChildNodes()) {
     item.removeChild(item.childNodes[0]);
@@ -1385,21 +1614,23 @@ function fnChartDisp() {
   if (input.length == 0) return;
 
   // 차트 영역 설정
-  var margin = {top: 25, right: 20, bottom: 20, left: 35};
-  var marginNavi = {top: 20, right: 20, bottom: 20, left: 35};
+  var margin = {top: 35, right: 20, bottom: 20, left: 50};
+  var marginNavi = {top: 20, right: 20, bottom: 20, left: 50};
   var width = document.getElementById("chartdiv").offsetWidth - margin.left - margin.right;
   var parseTime = d3.timeParse("%Y%m%d%H%M");
 
-  var date1 = new Date().setTime(parseTime(d3.min(dataset, function(d){return d.tm_ef;})).getTime()-3*60*60*1000);
-  var date2 = new Date().setTime(parseTime(d3.max(dataset, function(d){return d.tm_ef;})).getTime()+3*60*60*1000);
-  var xScale = d3.scaleTime().range([0,width]).domain([date1,date2]);//scaleBand is used for  bar chart
+  var date1 = new Date().setTime(parseTime(d3.min(dataset, function(d){return d.tm_ef;})).getTime());
+  var date2 = new Date().setTime(parseTime(d3.max(dataset, function(d){return d.tm_ef;})).getTime());
+  var barbsize = 15;
+  var xScale = d3.scaleTime().range([barbsize+10,width-(barbsize+10)]).domain([date1,date2]);//scaleBand is used for  bar chart
   var xscaleNavi = d3.scaleTime().range([0,width]).domain([date1,date2]);
   var xAxisNavi = d3.axisBottom(xscaleNavi).ticks(d3.timeDay).tickFormat(d3.timeFormat("%m/%d"));//no need to create grid
 
   // 시간 네비게이션
-  var context = d3.select("#chartdiv").append("div").append("svg")
+  var context = d3.select("#timediv").append("div").append("svg")
                   .attr("width",width+margin.left+margin.right)
                   .attr("height",20+margin.top)
+                  .style("z-index",200)
                   .append("g")
                   .attr("transform","translate("+marginNavi.left+","+marginNavi.top+")");
   var xAxisGroupNavi = context.append("g").call(xAxisNavi).attr("transform","translate(0,0)");
@@ -1436,39 +1667,75 @@ function fnChartDisp() {
   }
 
   // 범례
-  for (var k=0; k<nvar; k++) {
-    if (datainfo[idx[k]].model != "OBS") continue;
+  var el = document.createElement("div");
+  el.innerText = "[ 범례 ]";
+  el.style.fontWeight = 900;
+  document.getElementById("legenddiv").appendChild(el); 
 
-    var legend = {};
+  var el = document.createElement("div");
+  el.style.minHeight = "6px";
+  document.getElementById("legenddiv").appendChild(el); 
 
-    if (datainfo[idx[k]].name == "T") legend.name = "기온";
-    else if (datainfo[idx[k]].name == "TD") legend.name = "노점온도";
-    else if (datainfo[idx[k]].name == "WSD") legend.name = "풍향";
-    else if (datainfo[idx[k]].name == "RNAC") legend.name = "강수량";
+  for (var i=0; i<chart_list.length; i++) {
+    if (chart_list[i].disp == 0) {
+      continue;
+    }
 
-    if (datainfo[idx[k]].level != 0) legend.level = datainfo[idx[k]].level + "hPa";
-    else legend.level = "지상";
+    if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+      if (document.getElementById(chart_list[i].name + "_split").checked) {
+        if (chart_list[i].level < 0) {
+          continue;
+        }
+      }
+    }
 
-    legend.text = datainfo[idx[k]].model + " " + legend.name + "(" + legend.level + ")";
+    for (var k=0; k<nvar; k++) {
+      if (datainfo[idx[k]].model != "OBS") continue;
 
-    var el = document.createElement("div");
-    el.style.display = "flex";
-    var el2 = document.createElement("i");
-    el2.classList.add("fas");
-    el2.classList.add("fa-circle");
-    el2.style.color = color[k];
-    el2.style.position = "relative";
-    el2.style.fontSize = "80%";
-    el2.style.top = "3px";
-    el.appendChild(el2);
-    var el3 = document.createElement("div");
-    el3.style.minWidth = "4px";
-    el.appendChild(el3);
-    var el4 = document.createElement("div");
-    el4.innerText = legend.text;
-    el4.style.fontWeight = 900;
-    el.appendChild(el4);
-    document.getElementById("legenddiv").appendChild(el); 
+      for (var j=0; j<chart_list[i].vars.length; j++) {
+        if (datainfo[idx[k]].name == chart_list[i].vars[j]) {
+          if (chart_list[i].level >= 0 && datainfo[idx[k]].level != chart_list[i].level) {
+            continue;
+          }
+
+          var legend = {};
+
+          if (datainfo[idx[k]].name == "T") legend.name = "기온";
+          else if (datainfo[idx[k]].name == "TD") legend.name = "노점온도";
+          else if (datainfo[idx[k]].name == "WSD") legend.name = "풍향";
+          else if (datainfo[idx[k]].name == "RNAC") legend.name = "강수량";
+          else if (datainfo[idx[k]].name == "PSL") legend.name = "해면기압";
+          else if (datainfo[idx[k]].name == "WND") legend.name = "바람";
+          else if (datainfo[idx[k]].name == "GH") legend.name = "지위고도";
+          else if (datainfo[idx[k]].name == "EPOT") legend.name = "상당온위";
+          else if (datainfo[idx[k]].name == "TW") legend.name = "습구온도";
+
+          if (datainfo[idx[k]].level != 0) legend.level = datainfo[idx[k]].level + "hPa";
+          else legend.level = "지상";
+
+          legend.text = datainfo[idx[k]].model + " " + legend.name + "(" + legend.level + ")";
+
+          var el = document.createElement("div");
+          el.style.display = "flex";
+          var el2 = document.createElement("i");
+          el2.classList.add("fas");
+          el2.classList.add("fa-circle");
+          el2.style.color = color[k];
+          el2.style.position = "relative";
+          el2.style.fontSize = "80%";
+          el2.style.top = "3px";
+          el.appendChild(el2);
+          var el3 = document.createElement("div");
+          el3.style.minWidth = "4px";
+          el.appendChild(el3);
+          var el4 = document.createElement("div");
+          el4.innerText = legend.text;
+          el4.style.fontWeight = 900;
+          el.appendChild(el4);
+          document.getElementById("legenddiv").appendChild(el); 
+        }
+      }
+    }
   }
 
   for (var i=0; i<models.length; i++) {
@@ -1522,22 +1789,25 @@ function fnChartDisp() {
   .style("background-color","#DDD")
   .style("visibility","hidden");
 
-  tooltip.append("div").attr("id","tooltip_time");
-  for (var k=0; k<nvar; k++) {
-    tooltip.append("div").attr("id","tooltip"+k).style("display","none");
-    d3.select("#tooltip"+k).append("i").attr("class", "fas fa-circle").attr("id", "tooltip_label"+k).style("font-size", "80%");
-    d3.select("#tooltip"+k).append("span").attr("id", "tooltip_text"+k);
-  }
+  var tooltipCanvas = tooltip.append("canvas");
+  var tooltipCtx = tooltipCanvas.node().getContext('2d');
 
-  var newArr = [];
-  dataset.forEach(function(d){
-    newArr = newArr.concat(d);
-  });
-
-  var canvas = [], ctx = [], ymax = [], ymin = [], yScale = [], height = [], hoverCanvas = [], hoverCtx = [];
+  var canvas = [], ctx = [], ymax = [], ymin = [], yScale = [], height = [], hoverCanvas = [], hoverCtx = [], first = -999;
   for (var i=0; i<chart_list.length; i++) {
     if (chart_list[i].disp == 0) {
       continue;
+    }
+
+    if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+      if (document.getElementById(chart_list[i].name + "_split").checked) {
+        if (chart_list[i].level < 0) {
+          continue;
+        }
+      }
+    }
+
+    if (first < 0) {
+      first = i;
     }
 
     if (chart_list[i].name == "WND") {
@@ -1556,13 +1826,19 @@ function fnChartDisp() {
     ctx[i] = canvas[i].node().getContext('2d');
     
     //hover area
-    var left = document.getElementById("canvas_"+i).getBoundingClientRect().left + margin.left;
+    var newArr = [];
+    dataset.forEach(function(d){
+      newArr = newArr.concat(d);
+    });
+
+    var left = margin.left;
+    var top = document.getElementById("canvas_"+i).getBoundingClientRect().top - document.getElementById("canvas_"+first).getBoundingClientRect().top;
     hoverCanvas[i] = d3.select("#canvas_"+i).append("canvas")
                        .attr("data-id",i)
                        .attr("class","hover")
                        .attr("width",width)
                        .attr("height",height[i]+margin.top+margin.bottom)
-                       .style("position","absolute").style("z-index",100).style("left",parseFloat(left)+"px"); 
+                       .style("position","absolute").style("z-index",100).style("left",parseFloat(left)+"px").style("top",parseFloat(top)+"px"); 
 
     hoverCtx[i] = hoverCanvas[i].node().getContext('2d');
 
@@ -1581,7 +1857,7 @@ function fnChartDisp() {
     //add mouse event
     var bisectX = d3.bisector(function(d) {return parseTime(d.tm_ef);}).left;
     hoverCanvas[i].node().addEventListener("mousemove",function(e){
-      hover(e, this);
+      hover(e, first, this);
     })
     hoverCanvas[i].node().addEventListener("mouseout",function(e){
       clearHover();
@@ -1593,134 +1869,231 @@ function fnChartDisp() {
       continue;
     }
 
+    if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+      if (document.getElementById(chart_list[i].name + "_split").checked) {
+        if (chart_list[i].level < 0) {
+          continue;
+        }
+      }
+    }
+
     if (transform.k > 0 && domain1 != undefined && domain2 != undefined) {    
       zoomed(-1, i);
     }
   }
 
 
-  function hover(event, el){  
+  function hover(event, first, el){  
+    //console.log(event);
     var id = el.getAttribute("data-id");
-    //if (event.offsetX < margin.left) {
-    //  return;
-    //}
+
     var x = xScale.invert(event.offsetX);
-    //var y = yScale[parseInt(id)].invert(event.offsetY);
-    var i = bisectX(newArr, x, 1);//0 is the first point
-    i=i==newArr.length?newArr.length-1:i;
+    var n = bisectX(newArr, x, 1);//0 is the first point
+    n=n==newArr.length?newArr.length-1:n;
     if (newArr.length > 1) {
-      if ((parseTime(newArr[i].tm_ef)-x)>(x-parseTime(newArr[i-1].tm_ef))) {
-        i = i-1;
+      if ((parseTime(newArr[n].tm_ef)-x)>(x-parseTime(newArr[n-1].tm_ef))) {
+        n = n-1;
       }
     }
 
-    datax = newArr[i].tm_ef;
+    tooltipCtx.font = "700 12px Arial";
 
-    var tooltip_data = [];
-    for (var k=0; k<nvar; k++) {
-      tooltip_data[k] = {};
-      tooltip_data[k].color = color[k];
-      if (datainfo[idx[k]].name == "WND") {
-        if (newArr[i].data[idx[k]] != undefined) {
-          tooltip_data[k].wsd = parseFloat(newArr[i].data[idx[k]].toString().split(":")[0])*1.943844492;
-          tooltip_data[k].vec = parseFloat(newArr[i].data[idx[k]].toString().split(":")[1]);
+    var tooltip_data = [], tooltip_count = [];
+    var ntooltip = 0, tooltip_width = 0, tooltip_height;
+    tooltip_height = 18;
+
+    for (var i=0; i<chart_list.length; i++) {
+      if (chart_list[i].disp == 0) {
+        continue;
+      }
+
+      if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+        if (document.getElementById(chart_list[i].name + "_split").checked) {
+          if (chart_list[i].level < 0) {
+            continue;
+          }
         }
       }
-      else {
-        if (newArr[i].data[idx[k]] != undefined) tooltip_data[k].value = parseFloat(newArr[i].data[idx[k]]);
-        else tooltip_data[k].value = -999;
-      }
-      tooltip_data[k].model = datainfo[idx[k]].model;
-      tooltip_data[k].offset = datainfo[idx[k]].offset;
 
-      if (datainfo[idx[k]].name == "T") {
-        tooltip_data[k].name = "기온";
-        tooltip_data[k].unit = "℃";
-      }
-      else if (datainfo[idx[k]].name == "TD") {
-        tooltip_data[k].name = "노점온도";
-        tooltip_data[k].unit = "℃";
-      }
-      else if (datainfo[idx[k]].name == "WSD") tooltip_data[k].name = "풍향";
-      else if (datainfo[idx[k]].name == "RNAC") {
-        tooltip_data[k].name = "강수량";
-        tooltip_data[k].unit = "mm";
-      }
-      else if (datainfo[idx[k]].name == "EPOT") {
-        tooltip_data[k].name = "상당온위";
-        tooltip_data[k].unit = "K";
-      }
-      else if (datainfo[idx[k]].name == "GH") {
-        tooltip_data[k].name = "지위고도";
-        tooltip_data[k].unit = "gpm";
-      }
-      else if (datainfo[idx[k]].name == "PSL") {
-        tooltip_data[k].name = "해면기압";
-        tooltip_data[k].unit = "hPa";
-      }
-      else if (datainfo[idx[k]].name == "WND") {
-        tooltip_data[k].name = "바람";
+      tooltip_data[i] = [];
+      tooltip_count[i] = 0;
+
+      for (var k=0; k<nvar; k++) {
+        for (var j=0; j<chart_list[i].vars.length; j++) {
+          if (datainfo[idx[k]].name == chart_list[i].vars[j]) {
+            if (chart_list[i].level >= 0 && datainfo[idx[k]].level != chart_list[i].level) {
+              continue;
+            }
+
+            if (dataset[n].data[idx[k]] == undefined) {
+              continue;
+            }
+            else if (datainfo[idx[k]].name == "RNAC" && dataset[n].data[idx[k]] <= 0) {
+              continue;
+            }
+
+            var text = datainfo[idx[k]].model;
+
+            if (datainfo[idx[k]].offset != 0) {
+              text += "(" + datainfo[idx[k]].offset + "H)";
+            }
+            text += " ";
+
+            if (datainfo[idx[k]].name == "T") {
+              text += "기온";
+              var unit = "℃";
+            }
+            else if (datainfo[idx[k]].name == "TD") {
+              text += "노점온도";
+              var unit = "℃";
+            }
+            else if (datainfo[idx[k]].name == "RNAC") {
+              text += "강수량";
+              var unit = "mm";
+            }
+            else if (datainfo[idx[k]].name == "EPOT") {
+              text += "상당온위";
+              var unit = "K";
+            }
+            else if (datainfo[idx[k]].name == "GH") {
+              text += "지위고도";
+              var unit = "gpm";
+            }
+            else if (datainfo[idx[k]].name == "PSL") {
+              text += "해면기압";
+              var unit = "hPa";
+            }
+            else if (datainfo[idx[k]].name == "WND") {
+              text += "바람";
+            }
+            else if (datainfo[idx[k]].name == "TW") {
+              text += "습구온도";
+            }
+
+            if (datainfo[idx[k]].level != 0) text += "(" + datainfo[idx[k]].level + "hPa)";
+            else text += "(지상)";
+
+            var jj = tooltip_data[i].length;
+            tooltip_data[i][jj] = {};
+
+            if (datainfo[idx[k]].name == "WND") {
+              var wsd = parseFloat(dataset[n].data[idx[k]].toString().split(":")[0]);
+              var vec = parseFloat(dataset[n].data[idx[k]].toString().split(":")[1]);
+              text += " : " + vec.toFixed(0) + "º / " + parseFloat(wsd*1.943844492).toFixed(1) + "kt";
+              tooltip_data[i][jj].text = text;
+              tooltip_data[i][jj].color = color[k];
+            }
+            else {
+              text += " : " + dataset[n].data[idx[k]].toFixed(1) + unit;
+              tooltip_data[i][jj].data = dataset[n].data[idx[k]];
+              tooltip_data[i][jj].text = text;
+              tooltip_data[i][jj].color = color[k];
+            }
+
+            if (tooltip_width < tooltipCtx.measureText(text).width) {
+              tooltip_width = tooltipCtx.measureText(text).width;
+            }
+            tooltip_height += 16;
+
+            tooltip_count[i]++;
+          }
+        }
       }
 
-      if (datainfo[idx[k]].level != 0) tooltip_data[k].level = datainfo[idx[k]].level + "hPa";
-      else tooltip_data[k].level = "지상";
+      if (tooltip_count[i] > 0) {
+        tooltip_height += 6;
+      }
     }
 
-    tooltip_data.sort(function(a,b){
-      return(a.name != "강수량")?-1:(a.name == "강수량")?1:0;
-    });
+    if (tooltip_width < 60) {
+      tooltip_width = 60;
+    }
 
-    tooltip_data.sort(function(a,b){
-      return(a.name != "강수량" && b.name != "강수량" && a.name != "바람" && b.name != "바람" && a.value>b.value)?-1:(a.name != "강수량" && b.name != "강수량" && a.name != "바람" && b.name != "바람" && a.value<b.value)?1:0;
-    });
+    if (tooltip_height < 22) {
+      tooltip_height = 22;
+    }
 
-    tooltip_data.sort(function(a,b){
-      return(a.name == "강수량" && b.name == "강수량" && a.name != "바람" && b.name != "바람" && a.value>b.value)?-1:(a.name == "강수량" && b.name == "강수량" && a.name != "바람" && b.name != "바람" && a.value<b.value)?1:0;
-    });
+    tooltipCanvas.attr("width",tooltip_width+18)
+                 .attr("height",tooltip_height-4); 
 
-    d3.select("#tooltip_time").text("[" + datax.substring(4,6) + ". " + datax.substring(6,8) + ". " + datax.substring(8,10) + ":00]");
-    for (var k=0; k<nvar; k++) {
-      if (tooltip_data[k].name == "강수량") {
-        if (tooltip_data[k].value != undefined && tooltip_data[k].value > 0) {
-          d3.select("#tooltip"+k).style("display","block");
-          if (tooltip_data[k].offset != 0) {
-            d3.select("#tooltip_text"+k).text(" " + tooltip_data[k].model + "(" + tooltip_data[k].offset + "H) " + tooltip_data[k].name + "(" + tooltip_data[k].level + ") : " + tooltip_data[k].value.toFixed(1) + tooltip_data[k].unit);
-          }
-          else d3.select("#tooltip_text"+k).text(" " + tooltip_data[k].model +  " " + tooltip_data[k].name + "(" + tooltip_data[k].level + ") : " + tooltip_data[k].value.toFixed(1) + tooltip_data[k].unit);
-          d3.select("#tooltip_label"+k).style("color", tooltip_data[k].color);
-        }
-        else d3.select("#tooltip"+k).style("display","none");
+    var yy = 4;
+    tooltipCtx.textAlign = "left";
+    tooltipCtx.textBaseline = "top";
+    tooltipCtx.fillStyle = "black";
+    tooltipCtx.font = "700 12px Arial";
+    tooltipCtx.fillText("[" + newArr[n].tm_ef.substring(4,6) + ". " + newArr[n].tm_ef.substring(6,8) + ". " + newArr[n].tm_ef.substring(8,10) + ":00]", 0, yy);   
+    yy += 20;
+
+    for (var i=0; i<chart_list.length; i++) {
+      if (chart_list[i].disp == 0) {
+        continue;
       }
-      else if (tooltip_data[k].name == "바람") {
-        if (tooltip_data[k].wsd != undefined && tooltip_data[k].wsd > 0 && tooltip_data[k].vec != 0) {
-          d3.select("#tooltip"+k).style("display","block");
-          if (tooltip_data[k].offset != 0) {
-            d3.select("#tooltip_text"+k).text(" " + tooltip_data[k].model + "(" + tooltip_data[k].offset + "H) " + tooltip_data[k].name + "(" + tooltip_data[k].level + ") : " + tooltip_data[k].vec.toFixed(0) + "º, " + tooltip_data[k].wsd.toFixed(1) + "kt");
+
+      if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+        if (document.getElementById(chart_list[i].name + "_split").checked) {
+          if (chart_list[i].level < 0) {
+            continue;
           }
-          else d3.select("#tooltip_text"+k).text(" " + tooltip_data[k].model +  " " + tooltip_data[k].name + "(" + tooltip_data[k].level + ") : " + tooltip_data[k].vec.toFixed(0) + "º, " + tooltip_data[k].wsd.toFixed(1) + "kt");
-          d3.select("#tooltip_label"+k).style("color", tooltip_data[k].color);
         }
-        else d3.select("#tooltip"+k).style("display","none");
       }
-      else {
-        if (tooltip_data[k].value != undefined && tooltip_data[k].value != -999) {
-          d3.select("#tooltip"+k).style("display","block");
-          if (tooltip_data[k].offset != 0) {
-            d3.select("#tooltip_text"+k).text(" " + tooltip_data[k].model + "(" + tooltip_data[k].offset + "H) " + tooltip_data[k].name + "(" + tooltip_data[k].level + ") : " + tooltip_data[k].value.toFixed(1) + tooltip_data[k].unit);
-          }
-          else d3.select("#tooltip_text"+k).text(" " + tooltip_data[k].model +  " " + tooltip_data[k].name + "(" + tooltip_data[k].level + ") : " + tooltip_data[k].value.toFixed(1) + tooltip_data[k].unit);
-          d3.select("#tooltip_label"+k).style("color", tooltip_data[k].color);
-        }
-        else d3.select("#tooltip"+k).style("display","none");
+
+      if (chart_list[i].name != "WND") {
+        tooltip_data[i].sort(function(a,b){
+          return(a.data>b.data)?-1:(a.data<b.data)?1:0;
+        });
+      }
+
+      if (tooltip_count[i] > 0) {
+        tooltipCtx.lineWidth = 0.5;
+        tooltipCtx.setLineDash([1,2]);
+        tooltipCtx.beginPath();
+        tooltipCtx.moveTo(0,yy-5);
+        tooltipCtx.lineTo(tooltip_width+18,yy-5);
+        tooltipCtx.stroke();
+        tooltipCtx.setLineDash([]);
+      }
+
+      for (var jj=0; jj<tooltip_data[i].length; jj++) {
+        tooltipCtx.fillStyle = tooltip_data[i][jj].color;
+        tooltipCtx.beginPath();
+        tooltipCtx.arc(6,yy+4,4,0,2*Math.PI);
+        tooltipCtx.fill();
+
+        tooltipCtx.fillStyle = "black";
+        tooltipCtx.fillText(tooltip_data[i][jj].text, 14, yy);   
+        yy += 16;
+      }
+
+      if (tooltip_count[i] > 0) {
+        yy += 6;
       }
     }
-    tooltip.style("left", parseFloat(event.pageX + 15) + "px").style("top", parseFloat(event.pageY + 5) + "px").style("visibility","visible");
+
+    var left = parseFloat(event.offsetX + document.getElementById("canvas_"+id).getBoundingClientRect().left - document.getElementById("canvas_"+first).getBoundingClientRect().left + margin.left + 15);
+    var top = parseFloat(event.offsetY + document.getElementById("canvas_"+id).getBoundingClientRect().top - document.getElementById("canvas_"+first).getBoundingClientRect().top + 5);
+    
+    if (tooltip_width + left + 18 > width) {
+      left -= tooltip_width + 45;
+    }
+
+    tooltip.style("left", left + "px")
+           .style("top", top + "px")
+           .style("visibility","visible");
 
     for (var k=0; k<chart_list.length; k++) {
       if (chart_list[k].disp == 0) {
         continue;
       }
-      drawHover(k, hoverCtx[k], width, height[k], margin, x, i);
+
+      if (document.getElementById(chart_list[k].name + "_split") != undefined) {
+        if (document.getElementById(chart_list[k].name + "_split").checked) {
+          if (chart_list[k].level < 0) {
+            continue;
+          }
+        }
+      }
+
+      drawHover(k, hoverCtx[k], width, height[k], margin, x, n);
     }
   }
 
@@ -1749,6 +2122,14 @@ function fnChartDisp() {
       for (var i=0; i<chart_list.length; i++) {
         if (chart_list[i].disp == 0) {
           continue;
+        }
+
+        if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+          if (document.getElementById(chart_list[i].name + "_split").checked) {
+            if (chart_list[i].level < 0) {
+              continue;
+            }
+          }
         }
 
         drawGraph(i, ctx[i], width, height[i], margin);
@@ -1785,6 +2166,14 @@ function fnChartDisp() {
           continue;
         }
 
+        if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+          if (document.getElementById(chart_list[i].name + "_split").checked) {
+            if (chart_list[i].level < 0) {
+              continue;
+            }
+          }
+        }
+
         drawGraph(i, ctx[i], width, height[i], margin);
       }
     }
@@ -1805,8 +2194,10 @@ function fnChartDisp() {
     line_tm1 = addZeros(date1.getFullYear(),4) + addZeros(date1.getMonth()+1,2) + addZeros(date1.getDate(),2) + addZeros(date1.getHours(),2) + addZeros(date1.getMinutes(),2);
     line_tm2 = addZeros(date2.getFullYear(),4) + addZeros(date2.getMonth()+1,2) + addZeros(date2.getDate(),2) + addZeros(date2.getHours(),2) + addZeros(date2.getMinutes(),2);
 
-    bullet_tm1 = addZeros(domain1.getFullYear(),4) + addZeros(domain1.getMonth()+1,2) + addZeros(domain1.getDate(),2) + addZeros(domain1.getHours(),2) + addZeros(domain1.getMinutes(),2);
-    bullet_tm2 = addZeros(domain2.getFullYear(),4) + addZeros(domain2.getMonth()+1,2) + addZeros(domain2.getDate(),2) + addZeros(domain2.getHours(),2) + addZeros(domain2.getMinutes(),2);
+    //bullet_tm1 = addZeros(domain1.getFullYear(),4) + addZeros(domain1.getMonth()+1,2) + addZeros(domain1.getDate(),2) + addZeros(domain1.getHours(),2) + addZeros(domain1.getMinutes(),2);
+    //bullet_tm2 = addZeros(domain2.getFullYear(),4) + addZeros(domain2.getMonth()+1,2) + addZeros(domain2.getDate(),2) + addZeros(domain2.getHours(),2) + addZeros(domain2.getMinutes(),2);
+    bullet_tm1 = line_tm1;
+    bullet_tm2 = line_tm2;
   }
 
   function drawGraph(i, ctx, width, height, margin) {
@@ -1831,6 +2222,10 @@ function fnChartDisp() {
     for (k=0; k<nvar; k++) {
       for (var j=0; j<chart_list[i].vars.length; j++) {
         if (datainfo[idx[k]].name == chart_list[i].vars[j]) {
+          if (chart_list[i].level >= 0 && datainfo[idx[k]].level != chart_list[i].level) {
+            continue;
+          }
+
           for (var n=0; n<dataset.length; n++) {
             if (document.getElementById("dynamic-y").checked) {
               if (domain1 == undefined || domain2 == undefined) {
@@ -1854,14 +2249,30 @@ function fnChartDisp() {
     else {
       ymax[i] += (ymax[i]-ymin[i])/10;
       ymin[i] -= (ymax[i]-ymin[i])/10;
+
+      if (chart_list[i].name == "TMP") {
+        if (ymax[i] - ymin[i] < 10) {
+          ymax[i] += (10 - (ymax[i] - ymin[i]))/2.
+          ymin[i] -= (10 - (ymax[i] - ymin[i]))/2.
+        }
+      }
     }
     yScale[i] = d3.scaleLinear().range([0,height]).domain([ymax[i], ymin[i]]);  
 
     //add unit
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
+    ctx.font = "700 12px Arial";
+    if (chart_list[i].level > 0) {
+      ctx.fillText("" + chart_list[i].level + "hPa " + chart_list[i].text + " (" + chart_list[i].unit + ")", margin.left, 10);
+    }
+    else if (chart_list[i].level == 0) {
+      ctx.fillText("지상 " + chart_list[i].text + " (" + chart_list[i].unit + ")", margin.left, 10);
+    }
+    else {
+      ctx.fillText(chart_list[i].text + " (" + chart_list[i].unit + ")", margin.left, 10);
+    }
     ctx.font = "12px Arial";
-    ctx.fillText("(" + chart_list[i].unit + ")", margin.left, 10);
 
     //draw line
     for (k=0; k<nvar; k++) {
@@ -1874,6 +2285,10 @@ function fnChartDisp() {
         }
 
         if (datainfo[idx[k]].name == chart_list[i].vars[j]) {
+          if (chart_list[i].level >= 0 && datainfo[idx[k]].level != chart_list[i].level) {
+            continue;
+          }
+
           ctx.strokeStyle = color[k];
           if (datainfo[idx[k]].name == "RNAC") {
             ctx.lineWidth = 1;
@@ -1888,7 +2303,7 @@ function fnChartDisp() {
             for (var n=0; n<dataset.length; n++) {
               if (domain1 == undefined || domain2 == undefined) {
               }
-              else if (dataset[n].tm_ef < bullet_tm1 || dataset[n].tm_ef > bullet_tm2) {
+              else if (dataset[n].tm_ef < line_tm1 || dataset[n].tm_ef > line_tm2) {
                 continue;
               }
 
@@ -1933,6 +2348,10 @@ function fnChartDisp() {
         }
 
         if (datainfo[idx[k]].name == chart_list[i].vars[j]) {
+          if (chart_list[i].level >= 0 && datainfo[idx[k]].level != chart_list[i].level) {
+            continue;
+          }
+
           if (datainfo[idx[k]].model == "OBS") {
             var radius = 2.5;
           }
@@ -2000,7 +2419,7 @@ function fnChartDisp() {
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     ticks.forEach(function(d) {
-      ctx.fillText(d, 30, yScale[i](d)+margin.top);
+      ctx.fillText(d, 45, yScale[i](d)+margin.top);
     });
  
     //add x axis
@@ -2058,6 +2477,12 @@ function fnChartDisp() {
     date.setTime(parseTime(dataset[0].tm_ef).getTime()+60*60*1000);
     var scale = xScale(date) - xScale(parseTime(dataset[0].tm_ef));
     ctx.clearRect(0, 0, width+margin.left+margin.right, height+margin.top+margin.bottom);
+
+    //add unit
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.font = "700 12px Arial";
+    ctx.fillText(chart_list[i].text + " (" + chart_list[i].unit + ")", margin.left, 10);
     ctx.font = "12px Arial";
 
     //draw windbarb
@@ -2115,7 +2540,7 @@ function fnChartDisp() {
     //add level axis
     ctx.strokeStyle = "black";          
     ctx.lineWidth = 0.2;
-    ctx.textAlign = "left";
+    ctx.textAlign = "right";
     ctx.textBaseline = "top";
     ctx.font = "12px Arial";
     ctx.setLineDash([4,2]);
@@ -2127,10 +2552,10 @@ function fnChartDisp() {
         if (datainfo[idx[k]].name == chart_list[i].vars[j]) {
           if (pre_level != datainfo[idx[k]].level) {
             if (datainfo[idx[k]].level == 0) {
-              ctx.fillText("(지상)", 0, nwind*30+5+margin.top);
+              ctx.fillText("지상", 45, nwind*30+5+margin.top);
             }
             else {
-              ctx.fillText("(" + datainfo[idx[k]].level + ")", 0, nwind*30+5+margin.top);
+              ctx.fillText(datainfo[idx[k]].level + "hPa", 45, nwind*30+5+margin.top);
             }
             ctx.beginPath();
             ctx.moveTo(margin.left, nwind*30+margin.top);
@@ -2206,14 +2631,24 @@ function fnChartDisp() {
     ctx.stroke();
 
     ctx.setLineDash([]);
+
     var radius = 4;
     var barbsize = 15;
     var nwind = 0;
+
     for (var k=0; k<nvar; k++) {
       for (var j=0; j<chart_list[i].vars.length; j++) {
         if (datainfo[idx[k]].name == chart_list[i].vars[j]) {
+          if (chart_list[i].level >= 0 && datainfo[idx[k]].level != chart_list[i].level) {
+            continue;
+          }
+
           ctx.strokeStyle = color[k];
           ctx.fillStyle = color[k];
+
+          if (datainfo[idx[k]].name == "WND") {
+            nwind++;
+          }
 
           if (dataset[n].data[idx[k]] == undefined) {
             continue;
@@ -2225,8 +2660,8 @@ function fnChartDisp() {
           if (datainfo[idx[k]].name == "WND") {
             var wsd = parseFloat(dataset[n].data[idx[k]].toString().split(":")[0]);
             var vec = parseFloat(dataset[n].data[idx[k]].toString().split(":")[1]);
-            drawWindBarb(wsd, vec, barbsize, xScale(parseTime(dataset[n].tm_ef)), nwind*30+15+margin.top, ctx);
-            nwind++;
+            //ctx.lineWidth = 2;
+            drawWindBarb(wsd, vec, barbsize, xScale(parseTime(dataset[n].tm_ef)), (nwind-1)*30+15+margin.top, ctx);
           }
           else {
             ctx.beginPath();
@@ -2244,6 +2679,14 @@ function fnChartDisp() {
     for (var i=0; i<chart_list.length; i++) {
       if (chart_list[i].disp == 0) {
         continue;
+      }
+
+      if (document.getElementById(chart_list[i].name + "_split") != undefined) {
+        if (document.getElementById(chart_list[i].name + "_split").checked) {
+          if (chart_list[i].level < 0) {
+            continue;
+          }
+        }
       }
 
       hoverCtx[i].clearRect(0, 0, width+margin.left+margin.right, height[i]+margin.top+margin.bottom);
@@ -2309,30 +2752,14 @@ function fnChartDisp() {
 // 창 크기 변경에 따른 그래프 크기 조정
 function fnBodyResize() {
   if (disptype == "graph") {
-    document.getElementById('chartdiv').style.width = (window.innerWidth - document.getElementById('left_menu').offsetWidth - document.getElementById('legenddiv').offsetWidth - 60) + "px";
-    document.getElementById('chartdiv').style.height = (window.innerHeight - document.getElementById('head').offsetHeight - document.getElementById('menu').offsetHeight - 15) + "px";
+    document.getElementById('chartdiv').style.width = (window.innerWidth - document.getElementById('left_menu').offsetWidth - 178) + "px";
+    document.getElementById('chartdiv').style.height = (window.innerHeight - document.getElementById('head').offsetHeight - document.getElementById('menu').offsetHeight - 68) + "px";
     document.getElementById('legenddiv').style.height = (window.innerHeight - document.getElementById('head').offsetHeight - document.getElementById('menu').offsetHeight - 15) + "px";
     document.getElementById('drag_menu').style.height = (window.innerHeight - document.getElementById('head').offsetHeight - document.getElementById('menu').offsetHeight - 240) + "px";
     fnChartDisp();  
   }
   else if (disptype == "skew") {
     //document.getElementById('skew_container').style.height = (window.innerHeight - document.getElementById('head').offsetHeight - document.getElementById('menu').offsetHeight - 12) + "px";
-  }
-}
-
-// 스크롤에 따른 hoverCanvas 위치 조정
-function fnScroll() {
-  if (disptype == "graph") {
-    var chartdiv = document.getElementById('chartdiv');
-    chartdiv.addEventListener('scroll', function() {
-      var left = chartdiv.scrollLeft;
-      var top  = chartdiv.scrollTop;
-      var pop = document.querySelectorAll('.hover');
-
-      for (var i=0; i<pop.length; i++) {
-        pop[i].style.transform = "translate(" + parseInt(-left) + "px, " + parseInt(-top) + "px)";
-      }
-    });
   }
 }
 
@@ -2384,4 +2811,39 @@ function doKey(event, opt)
   }
 
   return 0;
+}
+
+// 구버전 이동
+function old_view() {
+  var url = "/wrn/wrn_ta_txt.php";
+ 
+  window.open(url,"_blank");
+}
+
+// 참조용 대상 링크 팝업으로 호출
+function view_win(page, wd) {
+  url = page;
+  window.open(url,"","location=yes,left=30,top=30,width=" + wd + ",height=800,scrollbars=yes,resizable=yes");
+}
+
+// inputbox에 숫자형식만 입력되도록 체크
+function fn_onlyNumInput(e) {
+  if (!isNaN(e.target.value) || (e.target.value[0] == "-" && e.target.value.length ==1)) {      
+  }
+  else {
+    var value = "";
+    var decimal_cnt = 0;
+    for (var i=0; i<e.target.value.length; i++) {
+      if ((i == 0 && e.target.value[i] == "-") || !isNaN(e.target.value[i])) {
+        value += e.target.value[i];
+      }      
+      else if (decimal_cnt == 0 && e.target.value[i] == ".") {
+        value += e.target.value[i];
+        decimal_cnt++;
+      }
+    }
+    //e.target.value = e.target.value.substring(0, e.target.value.length - 1);
+    e.target.value = value;
+    alert('숫자만 입력가능합니다.');
+  }
 }

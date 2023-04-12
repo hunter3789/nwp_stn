@@ -25,13 +25,13 @@ var SkewT = function(div, nskew) {
     var r = d3.scaleLinear().range([0,300]).domain([0,150]);
     var y2 = d3.scaleLinear();
     var bisectTemp = d3.bisector(function(d) { return d.pres; }).left; // bisector function for tooltips
-    var w, h, x, y, xAxis, yAxis, yAxis2;
-    var data = [], tmpData = [], base = 1000;
+    var w, h, x, y, xAxis, yAxis, yAxis2, xNavi, yNavi;
+    var data = [], tmpData = [];
     //aux
     var unit = "kt"; // or kmh
 
     //containers
-    var svg = wrapper.append("svg").attr("id", "svg");   //main svg
+    var svg = wrapper.append("svg").attr("id", "svg").attr("cursor", "grab");   //main svg
     var container = svg.append("g").attr("id", "container"); //container 
     var skewtbg = container.append("g").attr("id", "skewtbg").attr("class", "skewtbg");//background
     var skewtgroup = container.append("g").attr("class", "skewt"); // put skewt lines in this group
@@ -81,7 +81,6 @@ var SkewT = function(div, nskew) {
       plot(tmpData, -1);
       table_button = parseInt(idx) + 1;
       tableSelect(table_button, 1);
-      var n = skew_dataset.findIndex(function(x){return (x.tm_ef == tm_ef)});
       tableDisp(tmpData[idx]);
     }
 
@@ -90,19 +89,28 @@ var SkewT = function(div, nskew) {
     }
 
     function skewbasedragged() {
-      base = y.invert(d3.event.y);
+      //if (document.getElementById("skew_change").classList.contains("selected")) {
+      //}
+      //else {
+      //  return;
+      //}
+
+      var base = y.invert(d3.event.y);
+      var idx = this.getAttribute("data-idx");
 
       if (base < 300) {
         base = 300;
       }
-      else if (base > 1000) {
-        base = 1000;
+      else if (base > tmpData[idx].base) {
+        base = tmpData[idx].base;
       }
 
+      tmpData[idx].tmpBase = base;
+
       plot(tmpData, -1);
+      table_button = parseInt(idx) + 1;
       tableSelect(table_button, 1);
-      var n = skew_dataset.findIndex(function(x){return (x.tm_ef == tm_ef)});
-      tableDisp(tmpData[table_button-1]);
+      tableDisp(tmpData[idx]);
     }
 
     function tableIndexDisp(data) {
@@ -116,21 +124,21 @@ var SkewT = function(div, nskew) {
       table.classList.add("pop");
 
       var d_li = "";
-      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>BASE</td><td style='min-width:60px; text-align:center;'>";
+      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>BASE</td><td style='min-width:70px; text-align:center;'>";
       if (document.getElementById("skew_change").classList.contains("selected")) {
-        d_li += base.toFixed(0) + " hPa";
+        d_li += "<input class='edit prevent-keydown' type='text' name='tmpBase' value='" + parseFloat(data.tmpBase).toFixed(1) + "' oninput='fn_onlyNumInput(event);' onkeydown='if (event.keyCode == 13) fnSkewEdit();'></td>";
       }
       else {
-        d_li += "-";
+        d_li += data.tmpBase.toFixed(0) + " hPa";
       }
-      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>LCL</td><td style='min-width:60px; text-align:center;'>";
+      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>LCL</td><td style='min-width:70px; text-align:center;'>";
       if (data.lcl.p != -999) {
         d_li += data.lcl.p.toFixed(0) + " hPa";
       }
       else {
         d_li += "-";
       }
-      d_li += "</td><td style='min-width:50px; text-align:center; font-weight:bold;'>CCL</td><td style='min-width:90px; text-align:center;'>";
+      d_li += "</td><td style='min-width:50px; text-align:center; font-weight:bold;'>CCL</td><td style='min-width:70px; text-align:center;'>";
       if (data.ccl.p != -999) {
         d_li += data.ccl.p.toFixed(0) + " hPa";
       }
@@ -143,23 +151,23 @@ var SkewT = function(div, nskew) {
       table.appendChild(d_element);
 
       var d_li = "";
-      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>LFC</td><td style='min-width:60px; text-align:center;'>";
+      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>LFC</td><td style='min-width:70px; text-align:center;'>";
       if (data.lfc.p != -999 && data.lfc.p != data.el.p) {
         d_li += data.lfc.p.toFixed(0) + " hPa";
       }
       else {
         d_li += "-";
       }
-      d_li += "</td><td style='min-width:50px; text-align:center; font-weight:bold;'>EL</td><td style='min-width:60px; text-align:center;'>";
+      d_li += "</td><td style='min-width:50px; text-align:center; font-weight:bold;'>EL</td><td style='min-width:70px; text-align:center;'>";
       if (data.el.p != -999 && data.lfc.p != data.el.p) {
         d_li += data.el.p.toFixed(0) + " hPa";
       }
       else {
         d_li += "-";
       }
-      d_li += "</td><td style='min-width:50px; text-align:center; font-weight:bold;'>CAPE</td><td style='min-width:90px; text-align:center;'>";
-      if (data.cape.value > 0) {
-        d_li += data.cape.value.toFixed(0) + " J/Kg";
+      d_li += "</td><td style='min-width:50px; text-align:center; font-weight:bold;'>CVT</td><td style='min-width:70px; text-align:center;'>";
+      if (data.cvt > -99.) {
+        d_li += data.cvt.toFixed(1) + " ℃";
       }
       else {
         d_li += "-";
@@ -170,9 +178,83 @@ var SkewT = function(div, nskew) {
       table.appendChild(d_element);
 
       var d_li = "";
-      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>CIN</td><td style='min-width:60px; text-align:center;'>";
+      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>CAPE</td><td style='min-width:70px; text-align:center;'>";
+      if (data.cape.value > 0) {
+        d_li += data.cape.value.toFixed(0) + " J/Kg";
+      }
+      else {
+        d_li += "-";
+      }
+      d_li += "</td><td style='min-width:50px; text-align:center; font-weight:bold;'>CIN</td><td style='min-width:70px; text-align:center;'>";
       if (data.cin.value > 0) {
         d_li += data.cin.value.toFixed(0) + " J/Kg";
+      }
+      else {
+        d_li += "-";
+      }
+      d_li += "</td>";
+      var d_element = document.createElement("tr");
+      d_element.innerHTML = d_li;
+      table.appendChild(d_element);
+
+
+      var item = document.getElementById("skew_hail_table");
+      while (item.hasChildNodes()) {
+        item.removeChild(item.childNodes[0]);
+      }
+
+      var table = document.createElement("table");
+      document.getElementById("skew_hail_table").appendChild(table);
+      table.classList.add("pop");
+
+      var d_li = "";
+      d_li += "<td style='min-width:70px; text-align:center; font-weight:bold;'>우박 점검표</td><td><i class=\"fas fa-question-circle\" title=\"논문\" onclick=\"view_win('http://cht.kma.go.kr/doc/hail_size.pdf');\" style=\"cursor:pointer;\"></i></td>";
+      d_li += "<td style='min-width:70px; text-align:center; font-weight:bold;'>발생 가능성</td>";
+      if (data.cape.value >= 800 && data.hail.size >= 10) {
+        d_li += "<td style='min-width:40px; text-align:center; color:red; font-weight:bold;'>높음";
+      }
+      else if (data.cape.value >= 600 && data.hail.size >= 5) {
+        d_li += "<td style='min-width:40px; text-align:center; color:blue; font-weight:bold;'>보통";
+      }
+      else if (data.cape.value >= 400 && data.hail.size >= 1) {
+        d_li += "<td style='min-width:40px; text-align:center;'>낮음";
+      }
+      else {
+        d_li += "<td style='min-width:40px; text-align:center;'>-";
+      }
+      d_li += "</td>";
+      d_li += "<td style='min-width:65px; text-align:center; font-weight:bold;'>우박 직경</td><td style='min-width:40px; text-align:center;'>";
+      if (data.hail.size > 0) {
+        d_li += data.hail.size.toFixed(0) + "mm";
+      }
+      else {
+        d_li += "-";
+      }
+      d_li += "</td>";
+      var d_element = document.createElement("tr");
+      d_element.innerHTML = d_li;
+      table.appendChild(d_element);
+
+      var d_li = "";
+      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>delta1</td><td style='min-width:45px; text-align:center;'>";
+      if (data.hail.delta1 > 0) {
+        d_li += data.hail.delta1.toFixed(1);
+      }
+      else {
+        d_li += "-";
+      }
+      d_li += "</td>";
+      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>delta2</td><td style='min-width:45px; text-align:center;'>";
+      if (data.hail.delta2 > 0) {
+        d_li += data.hail.delta2.toFixed(1);
+      }
+      else {
+        d_li += "-";
+      }
+      d_li += "</td>";
+      d_li += "<td style='min-width:50px; text-align:center; font-weight:bold;'>WBZ</td><td style='min-width:60px; text-align:center;'>";
+      if (data.hail.wbz >= 0) {
+        d_li += data.hail.wbz.toFixed(0) + "m";
       }
       else {
         d_li += "-";
@@ -192,8 +274,10 @@ var SkewT = function(div, nskew) {
         h = height - margin.top - margin.bottom;     
         x = d3.scaleLinear().range([0, w]).domain([-50,50]);
         y = d3.scaleLog().range([0, h]).domain([topp, basep]);
+        xNavi = d3.scaleLinear().range([0, w]).domain([-50,50]);
+        yNavi = d3.scaleLog().range([0, h]).domain([topp, basep]);
         xAxis = d3.axisBottom(x).tickSize(0,0).ticks(10).tickFormat("");
-        yAxis = d3.axisRight(y).tickSize(0,0).tickValues(plines).tickFormat(d3.format(".0d"));
+        yAxis = d3.axisRight(y).tickSize(0,0).tickValues(plines.filter(function(d) { return (y(d) >= 0 && y(d) <= h); })).tickFormat(d3.format(".0d"));
         //yAxis2 = d3.axisRight(y).tickSize(5,0).tickValues(pticks);
     }
     
@@ -215,7 +299,7 @@ var SkewT = function(div, nskew) {
     //d3.select(window).on('resize', resize); 
 
     function resize() {
-        skewtbg.selectAll("*").remove(); 
+        //skewtbg.selectAll("*").remove(); 
         setVariables();
         svg.attr("width", w + margin.right + margin.left).attr("height", h + margin.top + margin.bottom);               
         container.attr("transform", "translate(" + margin.left + "," + margin.top + ")");       
@@ -226,6 +310,9 @@ var SkewT = function(div, nskew) {
     }
     
     var drawBackground = function() {
+        skewtbg.selectAll("*").remove(); 
+        yAxis = d3.axisRight(y).tickSize(0,0).tickValues(plines.filter(function(d) { return (y(d) >= 0 && y(d) <= h); })).tickFormat(d3.format(".0d"));
+
         // Add clipping path
         skewtbg.append("clipPath")
         .attr("id", "clipper")
@@ -247,7 +334,7 @@ var SkewT = function(div, nskew) {
         temp.forEach( function (item, i) {
           if (item % 20 != 0) return;
 
-          var poly = [{"x": x(item)-0.5, "y": h}, {"x": x(item+10)-0.5, "y": h}, {"x": x(item+10)-0.5 + (y(basep)-y(100))/tan, "y": 0}, {"x": x(item)-0.5 + (y(basep)-y(100))/tan, "y": 0}];
+          var poly = [{"x": x(item)-0.5, "y": y(basep)}, {"x": x(item+10)-0.5, "y": y(basep)}, {"x": x(item+10)-0.5 + (y(basep)-y(100))/tan, "y": y(100)}, {"x": x(item)-0.5 + (y(basep)-y(100))/tan, "y": y(100)}];
           skewtbg.append("polygon")
           .data([poly])
           .attr("fill", "#f2f2ff")
@@ -265,20 +352,21 @@ var SkewT = function(div, nskew) {
         .enter().append("line")
         .attr("x1", function(d) { return x(d)-0.5 + (y(basep)-y(100))/tan; })
         .attr("x2", function(d) { return x(d)-0.5; })
-        .attr("y1", 0)
-        .attr("y2", h)
+        .attr("y1", y(100))
+        .attr("y2", y(basep))
         .attr("class", function(d) { if (d % 10 == 0) { return "tempbold"; } else { return "templine"}})
         .attr("clip-path", "url(#clipper)");
         //.attr("transform", "translate(0," + h + ") skewX(-30)");
 
         // Logarithmic pressure lines
         skewtbg.selectAll("pressureline")
-        .data(plines)
+        .data(plines)  
         .enter().append("line")
         .attr("x1", 0)
         .attr("x2", w)
         .attr("y1", function(d) { return y(d); })
         .attr("y2", function(d) { return y(d); })
+        .attr("clip-path", "url(#clipper)")
         .attr("class", "templine");
 
         // create array to plot dry adiabats
@@ -418,6 +506,10 @@ var SkewT = function(div, nskew) {
             }
           }
         
+          if (xVal < 0 || xVal > w || yVal < 0 || yVal > h) {
+            return;
+          }  
+
           skewtbg.append("text")
             .attr("transform","translate( " + xVal + " ," + yVal + ")")
             .text(roundedMixR)
@@ -443,9 +535,13 @@ var SkewT = function(div, nskew) {
         temp.forEach( function (item, i) {
           if (item > 40 || item < -100) return;
 
-          xVal = x(item)-0.5 + (h - h/(temp.length-1)*i)/tan - 4;
-          yVal = h/(temp.length-1)*i;
-        
+          xVal = x(item)-0.5 + (y(basep) - y(basep)/(temp.length-1)*i)/tan - 4;
+          yVal = y(basep)/(temp.length-1)*i;
+
+          if (xVal < 0 || xVal > w || yVal < 0 || yVal > h) {
+            return;
+          }  
+
           skewtbg.append("text")
             .attr("transform","translate( " + xVal + " ," + yVal + ") rotate(-58)")
             .text(item)
@@ -564,42 +660,52 @@ var SkewT = function(div, nskew) {
         skewtgroup.selectAll("use").remove(); //clear previous paths from skew
         barbgroup.selectAll("use").remove(); //clear previous paths from barbs
 
-        //skewT base
-        if (document.getElementById("skew_change").classList.contains("selected")) {
-          skewtgroup.append("use")
-          .attr("stroke", "red")
-          .attr("fill", "red")
-          .attr("xlink:href", "#basedef")
-          .attr("transform", "translate(-6," + y(base) + ")")
-          .style('cursor', 'pointer')
-          .call(basedrag);
+        var item = document.getElementById("skew_index_table");
+        while (item.hasChildNodes()) {
+          item.removeChild(item.childNodes[0]);
+        }
 
-          skewtgroup.append("line")
-          .attr("stroke", "black")
-          .attr("x1", 0)
-          .attr("x2", w)
-          .attr("y1", y(base))
-          .attr("y2", y(base))
-          .attr("stroke-width", 2)
-          .style('cursor', 'pointer')
-          .call(basedrag);
+        var item = document.getElementById("skew_hail_table");
+        while (item.hasChildNodes()) {
+          item.removeChild(item.childNodes[0]);
         }
-        else {
-          base = 1000;
-        }
-        
+
         //if(data.length==0) return;
         var color = ["red", "blue", "green", "purple"];
+        var cnt = 0;
+
+        for (var idx=0; idx<s.length; idx++) {
+          if (s[idx] == undefined || s[idx].length == 0) continue;
+          cnt++;
+        }
 
         for (var idx=0; idx<s.length; idx++) {
           if (s[idx] == undefined || s[idx].length == 0) continue;
 
           //skew-t stuff
-          var skewtline = s[idx].filter(function(d) { return (d.ta > -999 && d.td > -999 && d.pres != "SFC"); });
+          var skewtline = s[idx].filter(function(d) { return (d.ta > -999 && d.td > -999 && (d.pres != "SFC" || (d.pres == "SFC" && d.ps != undefined && d.ps > 1000))); });
           var skewtlines = [];
           skewtlines.push(skewtline);
+
+          var skewtline2 = s[idx].filter(function(d) { return (d.ta > -999 && d.td > -999 && ((d.pres != "SFC" && d.pres >= 300) || (d.pres == "SFC" && d.ps != undefined && d.ps > 1000))); });
+          var skewtlines2 = [];
+          skewtlines2.push(skewtline2);
+
+          calcTw(s[idx]);
+
+          if (cnt == 1) {
+            var twline = d3.line().x(function(d,i) { if (d.pres != "SFC") return x(d.tw) + (y(basep)-y(d.pres))/tan; else return x(d.tw) + (y(basep)-y(d.ps))/tan; })
+                                  .y(function(d,i) { if (d.pres != "SFC") return y(d.pres); else return y(d.ps); });
+            var twlines = skewtgroup.selectAll("twlines")
+                .data(skewtlines2).enter().append("path")
+                .attr("stroke", "black")
+                .attr("class", "tw")
+                .attr("clip-path", "url(#clipper)")
+                .attr("d", twline);
+          }
         
-          var templine = d3.line().x(function(d,i) { return x(d.ta) + (y(basep)-y(d.pres))/tan; }).y(function(d,i) { return y(d.pres); });
+          var templine = d3.line().x(function(d,i) { if (d.pres != "SFC") return x(d.ta) + (y(basep)-y(d.pres))/tan; else return x(d.ta) + (y(basep)-y(d.ps))/tan; })
+                                  .y(function(d,i) { if (d.pres != "SFC") return y(d.pres); else return y(d.ps); });
           var templines = skewtgroup.selectAll("templines")
               .data(skewtlines).enter().append("path")
               .attr("stroke", color[idx])
@@ -607,7 +713,8 @@ var SkewT = function(div, nskew) {
               .attr("clip-path", "url(#clipper)")
               .attr("d", templine);
 
-          var tempdewline = d3.line().x(function(d,i) { return x(d.td) + (y(basep)-y(d.pres))/tan; }).y(function(d,i) { return y(d.pres); });
+          var tempdewline = d3.line().x(function(d,i) { if (d.pres != "SFC") return x(d.td) + (y(basep)-y(d.pres))/tan; else return x(d.td) + (y(basep)-y(d.ps))/tan; })
+                                     .y(function(d,i) { if (d.pres != "SFC") return y(d.pres); else return y(d.ps); });
           var tempDewlines = skewtgroup.selectAll("tempdewlines")
               .data(skewtlines).enter().append("path")
               .attr("stroke", color[idx])
@@ -616,7 +723,7 @@ var SkewT = function(div, nskew) {
               .attr("d", tempdewline);
 
           //barbs stuff
-          var barbs = s[idx].filter(function(d) { return (parseFloat(d.wsd) > 0 && d.pres >= 100 && d.pres != "SFC"); });
+          var barbs = s[idx].filter(function(d) { return (parseFloat(d.wsd) > 0 && d.pres >= 100 && d.pres != "SFC" && y(d.pres) >= 0 && y(d.pres) <= h); });
           var allbarbs = barbgroup.selectAll("barbs")
               .data(barbs).enter().append("use")
               .attr("stroke", color[idx])
@@ -629,31 +736,102 @@ var SkewT = function(div, nskew) {
 
           //skew-index
           var dset = s[idx].slice();
+
+          if (document.getElementById("model"+parseInt(idx+1)).value == "OBS") {
+            for (var k=0; k<dset.length; k++) {
+              if (dset[k].pres != -999 && dset[k].ta != -999 && dset[k].td != -999) {
+                var base = parseFloat(dset[k].pres);
+                break;
+              }
+            }
+          }
+          else {
+            var base = 1000;
+          }
+
           for (var k=0; k<dset.length; k++) {
-            if (dset[k].pres == "SFC" || parseFloat(dset[k].ta) <= -999.0 || parseFloat(dset[k].td) <= -999.0 || parseFloat(dset[k].pres) < 100.0) {
+            if ((dset[k].pres == "SFC" && dset[k].ps == undefined) || parseFloat(dset[k].ta) <= -999.0 || parseFloat(dset[k].td) <= -999.0 || parseFloat(dset[k].pres) < 100.0) {
               dset.splice(k,1);
               k--;
             }
-            else if (document.getElementById("skew_change").classList.contains("selected")) {
-              if (dset[k].pres > base) {
-                var dtmp = {};
-                dtmp.pres = dset[k].pres;
-                dtmp.ta = dset[k].ta;
-                dtmp.td = dset[k].td;
-                dset.splice(k,1);
+            else if (dset[k].pres == "SFC" && dset[k].ps != undefined) {
+              base = parseFloat(dset[k].ps);
+              s[idx].base = base;
+              var d = {};
+              d.pres = parseFloat(dset[k].ps);
+              d.ta = parseFloat(dset[k].ta);
+              d.td = parseFloat(dset[k].td);
+              d.gh = -999.;
+              dset.splice(k,1);
+              if (base < 1000) {
                 k--;
+              }
+              else {
+                dset.unshift(d);
               }
             }
           }
 
-          if (document.getElementById("skew_change").classList.contains("selected")) {
-            if (dset[0].pres != undefined && dset[0].pres != base && dtmp != undefined) {
-              var d = {};
-              d.pres = base;
-              d.ta = parseFloat(dtmp.ta) - (parseFloat(dtmp.ta) - parseFloat(dset[0].ta))/(parseFloat(dtmp.pres) - parseFloat(dset[0].pres)) * (parseFloat(dtmp.pres) - parseFloat(base));
-              d.td = parseFloat(dtmp.td) - (parseFloat(dtmp.td) - parseFloat(dset[0].td))/(parseFloat(dtmp.pres) - parseFloat(dset[0].pres)) * (parseFloat(dtmp.pres) - parseFloat(base));
-              d.gh = -999.;
-              dset.unshift(d);
+          if (s[idx].base == undefined) {
+            s[idx].base = base;
+          }
+
+          if (s[idx].tmpBase == undefined) {
+            s[idx].tmpBase = base;
+          }
+
+          for (var k=0; k<dset.length; k++) {
+            if (dset[k].pres > s[idx].tmpBase) {
+              var dtmp = {};
+              dtmp.pres = dset[k].pres;
+              dtmp.ta = dset[k].ta;
+              dtmp.td = dset[k].td;
+              dset.splice(k,1);
+              k--;
+            }
+          }
+
+          if (dset[0].pres != undefined && dset[0].pres != s[idx].tmpBase && dtmp != undefined) {
+            var d = {};
+            d.pres = s[idx].tmpBase;
+            d.ta = parseFloat(dtmp.ta) - (parseFloat(dtmp.ta) - parseFloat(dset[0].ta))/(parseFloat(dtmp.pres) - parseFloat(dset[0].pres)) * (parseFloat(dtmp.pres) - parseFloat(s[idx].tmpBase));
+            d.td = parseFloat(dtmp.td) - (parseFloat(dtmp.td) - parseFloat(dset[0].td))/(parseFloat(dtmp.pres) - parseFloat(dset[0].pres)) * (parseFloat(dtmp.pres) - parseFloat(s[idx].tmpBase));
+            d.gh = -999.;
+            dset.unshift(d);
+          }
+          //console.log(dset);
+
+          //skewT base
+          if (y(s[idx].tmpBase) >= 0 && y(s[idx].tmpBase) <= h) {
+            if (document.getElementById("skew_change").classList.contains("selected")) {
+              skewtgroup.append("use")
+              .attr("stroke", color[idx])
+              .attr("fill", color[idx])
+              .attr("xlink:href", "#basedef")
+              .attr("transform", "translate(-6," + y(s[idx].tmpBase) + ")")
+              .style('cursor', 'pointer')
+              .attr('data-idx', idx)
+              .call(basedrag);
+
+              skewtgroup.append("line")
+              .attr("stroke", color[idx])
+              .attr("x1", 0)
+              .attr("x2", w)
+              .attr("y1", y(s[idx].tmpBase))
+              .attr("y2", y(s[idx].tmpBase))
+              .attr("stroke-width", 2)
+              .style('cursor', 'pointer')
+              .attr('data-idx', idx)
+              .call(basedrag);
+            }
+            else {
+              skewtgroup.append("line")
+              .attr("stroke", color[idx])
+              .attr("x1", 0)
+              .attr("x2", w)
+              .attr("y1", y(s[idx].tmpBase))
+              .attr("y2", y(s[idx].tmpBase))
+              .attr("stroke-width", 1)
             }
           }
           //console.log(dset);
@@ -673,6 +851,8 @@ var SkewT = function(div, nskew) {
           var el = calcEl(dset, lcl, ccl, lfc);
           var cape = calcCape(dset, lcl, ccl, lfc, el);
           var cin = calcCin(dset, lcl, ccl, lfc, el);
+          var hail = calcHailSize(dset, ccl);
+          var cvt = calcCVT(dset, ccl);
 
           s[idx].lcl = lcl;
           s[idx].ccl = ccl;
@@ -680,6 +860,8 @@ var SkewT = function(div, nskew) {
           s[idx].el = el;
           s[idx].cape = cape;
           s[idx].cin = cin;
+          s[idx].hail = hail;
+          s[idx].cvt = cvt;
 
           if (table_button == parseInt(idx)+1) {
             tableIndexDisp(s[idx]);
@@ -716,108 +898,116 @@ var SkewT = function(div, nskew) {
               xVal = x(lcl.t-273.15) + (y(basep)-y(lcl.p))/tan;
               yVal = y(lcl.p);
 
-              skewtgroup.append("line")
-              .attr("x1", xVal)
-              .attr("x2", xVal - 20)
-              .attr("y1", yVal)
-              .attr("y2", yVal)
-              .attr("stroke", color[idx])
-              .attr("stroke-width", 0.75)
-              .attr("clip-path", "url(#clipper)");
+              if (xVal >= 0 && xVal <= w && yVal >= 0 && yVal <= h) {
+                skewtgroup.append("line")
+                .attr("x1", xVal)
+                .attr("x2", xVal - 20)
+                .attr("y1", yVal)
+                .attr("y2", yVal)
+                .attr("stroke", color[idx])
+                .attr("stroke-width", 0.75)
+                .attr("clip-path", "url(#clipper)");
 
-              skewtgroup.append("text")
-              .attr("x", xVal - 40)
-              .attr("y", yVal + 3)
-              .text("LCL")
-              .attr("class", "skewtext")
-              .attr("fill", color[idx]);
+                skewtgroup.append("text")
+                .attr("x", xVal - 40)
+                .attr("y", yVal + 3)
+                .text("LCL")
+                .attr("class", "skewtext")
+                .attr("fill", color[idx]);
 
-              skewtgroup.append("use")
-              .attr("stroke", color[idx])
-              .attr("fill", color[idx])
-              .attr("xlink:href", "#xdef")
-              .attr("transform", "translate("+xVal+","+yVal+")"); 
+                skewtgroup.append("use")
+                .attr("stroke", color[idx])
+                .attr("fill", color[idx])
+                .attr("xlink:href", "#xdef")
+                .attr("transform", "translate("+xVal+","+yVal+")"); 
+              }
             }
 
             if (ccl.p != -999 && ccl.p > 100 && ccl.t != lcl.t && ccl.p != lcl.p) {
               xVal = x(ccl.t-273.15) + (y(basep)-y(ccl.p))/tan;
               yVal = y(ccl.p);
 
-              skewtgroup.append("line")
-              .attr("x1", xVal)
-              .attr("x2", xVal + 20)
-              .attr("y1", yVal)
-              .attr("y2", yVal)
-              .attr("stroke", color[idx])
-              .attr("stroke-width", 0.75)
-              .attr("clip-path", "url(#clipper)");
+              if (xVal >= 0 && xVal <= w && yVal >= 0 && yVal <= h) {
+                skewtgroup.append("line")
+                .attr("x1", xVal)
+                .attr("x2", xVal + 20)
+                .attr("y1", yVal)
+                .attr("y2", yVal)
+                .attr("stroke", color[idx])
+                .attr("stroke-width", 0.75)
+                .attr("clip-path", "url(#clipper)");
 
-              skewtgroup.append("text")
-              .attr("x", xVal + 25)
-              .attr("y", yVal + 3)
-              .text("CCL")
-              .attr("class", "skewtext")
-              .attr("fill", color[idx]);
+                skewtgroup.append("text")
+                .attr("x", xVal + 25)
+                .attr("y", yVal + 3)
+                .text("CCL")
+                .attr("class", "skewtext")
+                .attr("fill", color[idx]);
 
-              skewtgroup.append("use")
-              .attr("stroke", color[idx])
-              .attr("fill", color[idx])
-              .attr("xlink:href", "#xdef")
-              .attr("transform", "translate("+xVal+","+yVal+")"); 
+                skewtgroup.append("use")
+                .attr("stroke", color[idx])
+                .attr("fill", color[idx])
+                .attr("xlink:href", "#xdef")
+                .attr("transform", "translate("+xVal+","+yVal+")"); 
+              }
             }
 
             if (lfc.t != -999 && lfc.t != lcl.t && lfc.p != lcl.p) {
               xVal = x(lfc.t-273.15) + (y(basep)-y(lfc.p))/tan;
               yVal = y(lfc.p);
 
-              skewtgroup.append("line")
-              .attr("x1", xVal)
-              .attr("x2", xVal - 20)
-              .attr("y1", yVal)
-              .attr("y2", yVal)
-              .attr("stroke", color[idx])
-              .attr("stroke-width", 0.75)
-              .attr("clip-path", "url(#clipper)");
+              if (xVal >= 0 && xVal <= w && yVal >= 0 && yVal <= h) {
+                skewtgroup.append("line")
+                .attr("x1", xVal)
+                .attr("x2", xVal - 20)
+                .attr("y1", yVal)
+                .attr("y2", yVal)
+                .attr("stroke", color[idx])
+                .attr("stroke-width", 0.75)
+                .attr("clip-path", "url(#clipper)");
 
-              skewtgroup.append("text")
-              .attr("x", xVal - 40)
-              .attr("y", yVal + 3)
-              .text("LFC")
-              .attr("class", "skewtext")
-              .attr("fill", color[idx]);
+                skewtgroup.append("text")
+                .attr("x", xVal - 40)
+                .attr("y", yVal + 3)
+                .text("LFC")
+                .attr("class", "skewtext")
+                .attr("fill", color[idx]);
 
-              skewtgroup.append("use")
-              .attr("stroke", color[idx])
-              .attr("fill", color[idx])
-              .attr("xlink:href", "#xdef")
-              .attr("transform", "translate("+xVal+","+yVal+")"); 
+                skewtgroup.append("use")
+                .attr("stroke", color[idx])
+                .attr("fill", color[idx])
+                .attr("xlink:href", "#xdef")
+                .attr("transform", "translate("+xVal+","+yVal+")"); 
+              }
             }
 
             if (el.t != -999 && el.p != lfc.p) {
               xVal = x(el.t-273.15) + (y(basep)-y(el.p))/tan;
               yVal = y(el.p);
 
-              skewtgroup.append("line")
-              .attr("x1", xVal)
-              .attr("x2", xVal + 20)
-              .attr("y1", yVal)
-              .attr("y2", yVal)
-              .attr("stroke", color[idx])
-              .attr("stroke-width", 0.75)
-              .attr("clip-path", "url(#clipper)");
+              if (xVal >= 0 && xVal <= w && yVal >= 0 && yVal <= h) {
+                skewtgroup.append("line")
+                .attr("x1", xVal)
+                .attr("x2", xVal + 20)
+                .attr("y1", yVal)
+                .attr("y2", yVal)
+                .attr("stroke", color[idx])
+                .attr("stroke-width", 0.75)
+                .attr("clip-path", "url(#clipper)");
 
-              skewtgroup.append("text")
-              .attr("x", xVal + 25)
-              .attr("y", yVal + 3)
-              .text("EL")
-              .attr("class", "skewtext")
-              .attr("fill", color[idx]);
+                skewtgroup.append("text")
+                .attr("x", xVal + 25)
+                .attr("y", yVal + 3)
+                .text("EL")
+                .attr("class", "skewtext")
+                .attr("fill", color[idx]);
 
-              skewtgroup.append("use")
-              .attr("stroke", color[idx])
-              .attr("fill", color[idx])
-              .attr("xlink:href", "#xdef")
-              .attr("transform", "translate("+xVal+","+yVal+")"); 
+                skewtgroup.append("use")
+                .attr("stroke", color[idx])
+                .attr("fill", color[idx])
+                .attr("xlink:href", "#xdef")
+                .attr("transform", "translate("+xVal+","+yVal+")"); 
+              }
             }
             //console.log(lcl, ccl, lfc, el, cape);
           }
@@ -827,8 +1017,8 @@ var SkewT = function(div, nskew) {
               skewtgroup.selectAll("draggable-td")
               .data(skewtline).enter().append("circle")
               .attr("r", 3)
-              .attr("cx", function(d) { return x(d.td) + (y(basep)-y(d.pres))/tan; })
-              .attr("cy", function(d) { return y(d.pres); })
+              .attr("cx", function(d) { if (d.pres != "SFC") return x(d.td) + (y(basep)-y(d.pres))/tan; else return x(d.td) + (y(basep)-y(d.ps))/tan; })
+              .attr("cy", function(d) { if (d.pres != "SFC") return y(d.pres); else return y(d.ps); })
               .attr("stroke", color[idx])
               .attr("fill", color[idx])
               .attr("fill-opacity", 0)
@@ -842,8 +1032,8 @@ var SkewT = function(div, nskew) {
               skewtgroup.selectAll("draggable-ta")
               .data(skewtline).enter().append("circle")
               .attr("r", 3)
-              .attr("cx", function(d) { return x(d.ta) + (y(basep)-y(d.pres))/tan; })
-              .attr("cy", function(d) { return y(d.pres); })
+              .attr("cx", function(d) { if (d.pres != "SFC") return x(d.ta) + (y(basep)-y(d.pres))/tan; else return x(d.ta) + (y(basep)-y(d.ps))/tan; })
+              .attr("cy", function(d) { if (d.pres != "SFC") return y(d.pres); else return y(d.ps); })
               .attr("fill", color[idx])
               .style('cursor', 'pointer')
               .attr('data-idx', idx)
@@ -877,5 +1067,28 @@ var SkewT = function(div, nskew) {
     //init 
     setVariables();
     resize();
+
+
+    //zoom
+    var zoom = d3.zoom()
+                 .scaleExtent([1,5])// <1 means can resize smaller than  original size
+                 .translateExtent([[0,0],[w,h]])
+                 .extent([[0,0],[w,h]])//view point size
+                 .on("zoom",zoomed);
+
+    svg.call(zoom);
+
+    function zoomed(opt, i){  
+      if (opt != -1) {
+        x.domain(d3.event.transform.rescaleX(xNavi).domain());
+        y.domain(d3.event.transform.rescaleY(yNavi).domain());
+        drawBackground();
+        plot(tmpData, -1);
+      }
+      else {
+        drawBackground();
+        plot(tmpData, -1);
+      }
+    }
 
 };

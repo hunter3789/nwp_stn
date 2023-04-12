@@ -118,7 +118,7 @@ select option {font-size: 12px; color: #000000;}
 .fixed_table {position:relative; overflow:hidden;}
 .fixed_table thead {position:relative; overflow:visible; display:block;}
 .fixed_table thead th:nth-child(1) {position:relative; will-change: transform; transition: all 0ms ease-in-out;}
-.fixed_table tbody {position:relative; overflow:auto; display:block; height:600px;}
+.fixed_table tbody {position:relative; overflow:auto; display:block; height:340px; width:360px;}
 .fixed_table tbody td:nth-child(1) {position:sticky; will-change: transform; transition: all 0ms ease-in-out; z-index:1; left:0px;}
 
 .gray-border {
@@ -270,6 +270,10 @@ input[type="checkbox"] {
   stroke-dasharray: 3;
   stroke-width: 2px;
 }
+.tw {
+  fill: none;
+  stroke-width: 1px;
+}
 .skline   { stroke-width: 1.8px; opacity: 0.8;}
 .mean     { stroke-width: 2.5px; }
 
@@ -313,7 +317,7 @@ input[type="checkbox"] {
 
 .skewtext { font-size:10px; }
 
-.skewtextbold { font-family:'????','Verdana'; font-size:10px; font-weight:700;}
+.skewtextbold { font-family:'±¼¸²','Verdana'; font-size:10px; font-weight:700;}
 
 .windbarb { stroke: #000; stroke-width: 0.75px; fill: none;}
 
@@ -334,8 +338,8 @@ input[type="checkbox"] {
   color:white;
 }
 
-.pop {font-family:'????','Verdana'; color: #222222;}
-.pop th {text-align:center; min-width:72px; font-size:10pt;}
+.pop {font-family:'±¼¸²','Verdana'; color: #222222; border-spacing:0px; background-color:#eaeaea; border-radius:2px; padding:2px;}
+.pop th {text-align:center; width:72px; font-size:10pt;}
 .pop td {text-align:center; font-size:10pt;}
 
 .select-button {
@@ -370,4 +374,17 @@ input[type="checkbox"] {
 
 [draggable] {
   user-select: none;
+}
+
+.skewtbg {
+  user-select: none;
+}
+
+.edit {
+  border: none;
+  width: 60px;
+  height: 16px;
+  text-align: center;
+  background-color: #fafafa;
+  font-size: 10pt;
 }
