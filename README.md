@@ -1,5 +1,5 @@
 # nwp_stn
-1. Skew-T Diagram Analysis Tool 
+Skew-T Diagram Analysis Tool 
 - View Skew-T Diagram and can overlay multiple Diagrams
 - Support Zoom/Drag
 - Provide Dynamic Interaction (Modifying Temperature/Moisture Values)
@@ -9,7 +9,7 @@
 [Demo gif 2]
 
 
-2. Multi-variables Time-series Graph Viewer
+Multi-variables Time-series Graph Viewer
 - View Multi-variables Time-series Graphs
 - Support Zoom/Drag
 
