@@ -4,7 +4,7 @@
 - Support Zoom/Drag
 - Provide Dynamic Interaction (Modifying Temperature/Moisture Values)
 
-[Demo image 1] (./image/skew_demo1.gif)
+[Demo image 1] (https://hunter3789.github.io/nwp_stn/image/skew_demo1.gif)
 
 [Demo image 2] (https://hunter3789.github.io/nwp_stn/image/skew_demo2.gif)
 
