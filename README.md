@@ -6,11 +6,11 @@
 
 [Demo gif 1] (https://hunter3789.github.io/nwp_stn/image/skew_demo1.gif)
 
-[Demo gif 2]
+[Demo gif 2] (https://hunter3789.github.io/nwp_stn/image/skew_demo2.gif)
 
 
 **Multi-variables Time-series Graph Viewer**
 - View Multi-variables Time-series Graphs
 - Support Zoom/Drag
 
-[Demo gif]
+[Demo gif] (https://hunter3789.github.io/nwp_stn/image/timeseries_demo1.gif)
