@@ -15,4 +15,4 @@
 - Support Zoom/Drag
 
 [Demo image] 
-<img src="https://hunter3789.github.io/nwp_stn/image/timeseries_demo1.gif">
+<img src="https://hunter3789.github.io/nwp_stn/image/timeseries_demo1.png">
