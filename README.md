@@ -10,7 +10,7 @@
 
 
 **Multi-variables Time-series Graph Viewer**
-- View Multi-variables Time-series Graphs
+- View Multi-variables (Selectable) Time-series Graphs
 - Support Zoom/Drag
 
 [Demo gif] (https://hunter3789.github.io/nwp_stn/image/timeseries_demo1.png)
