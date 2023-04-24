@@ -2,6 +2,8 @@
  * SkewT v1.1.0
  * 2016 David Felix - dfelix@live.com.pt
  * 
+ * Modified: ChangJae, Lee, 2021
+ * 
  * Dependency:
  * d3.v3.min.js from https://d3js.org/
  * 
@@ -167,7 +169,7 @@ var SkewT = function(div, nskew) {
       }
       d_li += "</td><td style='min-width:50px; text-align:center; font-weight:bold;'>CVT</td><td style='min-width:70px; text-align:center;'>";
       if (data.cvt > -99.) {
-        d_li += data.cvt.toFixed(1) + " ¡É";
+        d_li += data.cvt.toFixed(1) + " â„ƒ";
       }
       else {
         d_li += "-";
@@ -208,22 +210,22 @@ var SkewT = function(div, nskew) {
       table.classList.add("pop");
 
       var d_li = "";
-      d_li += "<td style='min-width:70px; text-align:center; font-weight:bold;'>¿ì¹Ú Á¡°ËÇ¥</td><td><i class=\"fas fa-question-circle\" title=\"³í¹®\" onclick=\"view_win('http://cht.kma.go.kr/doc/hail_size.pdf');\" style=\"cursor:pointer;\"></i></td>";
-      d_li += "<td style='min-width:70px; text-align:center; font-weight:bold;'>¹ß»ı °¡´É¼º</td>";
+      d_li += "<td style='min-width:70px; text-align:center; font-weight:bold;'>ìš°ë°• ì ê²€í‘œ</td><td><i class=\"fas fa-question-circle\" title=\"ë…¼ë¬¸\" onclick=\"view_win('http://cht.kma.go.kr/doc/hail_size.pdf');\" style=\"cursor:pointer;\"></i></td>";
+      d_li += "<td style='min-width:70px; text-align:center; font-weight:bold;'>ë°œìƒ ê°€ëŠ¥ì„±</td>";
       if (data.cape.value >= 800 && data.hail.size >= 10) {
-        d_li += "<td style='min-width:40px; text-align:center; color:red; font-weight:bold;'>³ôÀ½";
+        d_li += "<td style='min-width:40px; text-align:center; color:red; font-weight:bold;'>ë†’ìŒ";
       }
       else if (data.cape.value >= 600 && data.hail.size >= 5) {
-        d_li += "<td style='min-width:40px; text-align:center; color:blue; font-weight:bold;'>º¸Åë";
+        d_li += "<td style='min-width:40px; text-align:center; color:blue; font-weight:bold;'>ë³´í†µ";
       }
       else if (data.cape.value >= 400 && data.hail.size >= 1) {
-        d_li += "<td style='min-width:40px; text-align:center;'>³·À½";
+        d_li += "<td style='min-width:40px; text-align:center;'>ë‚®ìŒ";
       }
       else {
         d_li += "<td style='min-width:40px; text-align:center;'>-";
       }
       d_li += "</td>";
-      d_li += "<td style='min-width:65px; text-align:center; font-weight:bold;'>¿ì¹Ú Á÷°æ</td><td style='min-width:40px; text-align:center;'>";
+      d_li += "<td style='min-width:65px; text-align:center; font-weight:bold;'>ìš°ë°• ì§ê²½</td><td style='min-width:40px; text-align:center;'>";
       if (data.hail.size > 0) {
         d_li += data.hail.size.toFixed(0) + "mm";
       }
